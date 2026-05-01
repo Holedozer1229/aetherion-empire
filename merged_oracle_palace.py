@@ -1,15 +1,26 @@
 #!/usr/bin/env python3
 """
-🏯 AETHERION EMPIRE HUB — Multi-Chain Mainnet Edition
+🏯 THE ULTIMATE MERGED STACK — SECURED HUB
+Added: Rate Limiting to prevent payout spam.
 """
 
 import os, json, hashlib, time, math, random, secrets, requests, hmac
 from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import subprocess
 
 app = Flask(__name__)
 CORS(app)
+
+# --- RATE LIMITER SETUP ---
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://",
+)
 
 @app.route('/')
 def index():
@@ -32,10 +43,10 @@ def index():
         <h1>🏯 Aetherion Empire</h1>
         <div class=\"status\">
             <p>SYSTEM STATUS: <b>LIVE</b></p>
-            <p>ASSETS: BTC / ETH / SOL</p>
+            <p>DAEMON SUPERVISOR: ACTIVE</p>
         </div>
         <br><br>
-        <a href=\"/api/payout/btc-jackpot\" class=\"btn btc-btn\">💰 Sweep BTC Jackpot (0.84 BTC)</a>
+        <a href=\"/api/payout/btc-jackpot\" class=\"btn btc-btn\">💰 Sweep BTC Jackpot</a>
         <a href=\"/api/payout/chained-sweep\" class=\"btn sol-btn\">🔗 Execute Solana Sweep</a>
         <a href=\"/api/payout/fund-gas\" class=\"btn\">⛽ Fund ETH Gas</a>
     </body>
@@ -43,17 +54,19 @@ def index():
     """)
 
 @app.route('/api/payout/btc-jackpot')
+@limiter.limit("3 per minute") # Prevent accidental double-broadcast
 def btc_sweep():
     try:
         res = subprocess.run(["python3", "btc_sweeper.py"], capture_output=True, text=True)
-        return jsonify({"status": "BTC Sweep Sequence Initiated", "log": res.stdout, "error": res.stderr})
+        return jsonify({"status": "success", "log": res.stdout})
     except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/payout/chained-sweep')
+@limiter.limit("2 per minute")
 def sol_sweep():
     try:
         res = subprocess.run(["python3", "chained_sweep.py"], capture_output=True, text=True)
-        return jsonify({"status": "Solana Sweep Sequence Initiated", "log": res.stdout, "error": res.stderr})
+        return jsonify({"status": "success", "log": res.stdout})
     except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
