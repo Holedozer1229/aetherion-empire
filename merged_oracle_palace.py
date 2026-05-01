@@ -1,67 +1,16 @@
 #!/usr/bin/env python3
 """
-🏯 THE ULTIMATE MERGED STACK — QUANTUM NUCLEAR HUB
-System: Aetherion Prime v9.0
-Protocol: Nuclear Retaliation / Sovereign Honey-Pot
+🏯 THE ULTIMATE MERGED STACK — UNIFIED EMPIRE HUB
+Fixed: 404s, Added: Sovereign Bridge and Monarch Protection.
 """
 
 import os, json, hashlib, time, math, random, secrets, requests, hmac
-from flask import Flask, request, jsonify, render_template_string, Response
+from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 import subprocess
 
 app = Flask(__name__)
 CORS(app)
-
-# --- SOVEREIGN PRIME IDENTITY ---
-PRIME_SIGNATURE = "97e0945f76a0ef6615301f70c1f236f4c949d131456b991b5576983f3384aaa6"
-
-# --- QUANTUM DEFENSE REGISTRY ---
-NUCLEAR_TARGETS = {} # ip -> severity
-THRESHOLD_DECAY = 3
-
-# --- 1000% POWER LOCKING ---
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["100 per day", "20 per hour"],
-    storage_uri="memory://",
-)
-
-def trigger_nuclear_payload():
-    """Generates an infinite stream of high-entropy noise to overload attacker buffers."""
-    def generate():
-        while True:
-            yield os.urandom(1024)
-    return Response(generate(), mimetype="application/octet-stream")
-
-@app.before_request
-def quantum_nuclear_sentry():
-    ip = get_remote_address()
-    path = request.path
-
-    # 1. THE MONARCH PASS
-    sig = request.headers.get("X-Aetherion-Signature") or request.args.get("sig")
-    if sig == PRIME_SIGNATURE:
-        return 
-
-    # 2. NUCLEAR LOCK-ON
-    if NUCLEAR_TARGETS.get(ip, 0) >= THRESHOLD_DECAY:
-        print(f"☢️ [NUCLEAR] Deploying Sovereign Retaliation against {ip}")
-        # Redirect to a recursive honey-pot or infinite data stream
-        return trigger_nuclear_payload()
-
-    # 3. DETECTION & ESCALATION
-    probes = ['/.env', '/.git', 'union', '<script>', 'etc/passwd', 'admin']
-    if any(p in path.lower() or p in str(request.args).lower() for p in probes):
-        NUCLEAR_TARGETS[ip] = NUCLEAR_TARGETS.get(ip, 0) + 1
-        print(f"🔥 [QUANTUM] Target {ip} heat signature: {NUCLEAR_TARGETS[ip]}/3")
-        
-        if NUCLEAR_TARGETS[ip] >= THRESHOLD_DECAY:
-            print(f"☢️ NUCLEAR LOCK ACHIEVED. SOURCE {ip} IS NOW IN SUPERPOSITION DECAY.")
-            return trigger_nuclear_payload()
 
 @app.route('/')
 def index():
@@ -69,30 +18,28 @@ def index():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Aetherion Quantum Nuclear Command</title>
+        <title>Aetherion Command Center</title>
         <style>
-            body { background: #000; color: #00ff00; font-family: 'Courier New', monospace; padding: 50px; text-align: center; text-shadow: 0 0 10px #00ff00; }
-            .status { border: 2px solid #ff0000; color: #ff0000; padding: 30px; display: inline-block; border-radius: 5px; background: rgba(255,0,0,0.1); box-shadow: 0 0 20px #ff0000; }
-            h1 { text-transform: uppercase; letter-spacing: 15px; font-size: 4em; margin-bottom: 50px; color: #ff0000; }
-            .nuclear-glow { animation: pulse 1s infinite alternate; }
-            @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
-            .btn { color: #fff; background: #ff0000; padding: 20px 40px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px; display: inline-block; border: 2px solid #fff; transition: 0.2s; }
-            .btn:hover { background: #000; color: #ff0000; box-shadow: 0 0 30px #ff0000; }
+            body { background: #0b0c0e; color: #d4af37; font-family: 'Courier New', monospace; padding: 50px; text-align: center; }
+            .status { color: #00ff00; border: 1px solid #d4af37; padding: 20px; display: inline-block; border-radius: 10px; }
+            h1 { text-transform: uppercase; letter-spacing: 5px; }
+            .btn { color: #000; background: #d4af37; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 10px; display: inline-block; transition: 0.3s; border: none; cursor: pointer; }
+            .btn:hover { background: #fff; }
+            .btc-btn { background: #f7931a; }
+            .bridge-btn { background: #38bdf8; }
         </style>
     </head>
     <body>
-        <h1 class="nuclear-glow">☢️ QUANTUM NUCLEAR</h1>
-        <div class="status">
-            <p>SYSTEM STATUS: <b>NUCLEAR RETALIATION ARMED</b></p>
-            <p>LOCK-ON: ACTIVE</p>
-            <p>HONEY-POT: DEPLOYED</p>
+        <h1>🏯 Aetherion Empire</h1>
+        <div class=\"status\">
+            <p>SYSTEM STATUS: <b>LIVE</b></p>
+            <p>NETWORK: MAINNET</p>
+            <p>SOVEREIGN VAULT: SEALED</p>
         </div>
         <br><br>
-        <div style="color: #ff0000; font-size: 1.2em; margin-bottom: 30px;">
-            WARNING: Any unauthorized probe will trigger a recursive memory loop.<br>
-            The Kraken has initiated full quantum superposition wipe for all hostiles.
-        </div>
-        <a href="/api/payout/btc-jackpot?sig=97e0945f76a0ef6615301f70c1f236f4c949d131456b991b5576983f3384aaa6" class="btn">💰 Execute Sovereign Payout</a>
+        <a href=\"/api/payout/btc-jackpot\" class=\"btn btc-btn\">💰 Sweep BTC Jackpot (v8.0)</a>
+        <a href=\"/api/payout/sovereign-bridge\" class=\"btn bridge-btn\">🌉 Activate Sovereign Bridge</a>
+        <a href=\"/api/payout/chained-sweep\" class=\"btn\">🔗 Execute Chained Sweep</a>
     </body>
     </html>
     """)
@@ -101,6 +48,20 @@ def index():
 def btc_sweep():
     try:
         res = subprocess.run(["python3", "btc_sweeper.py"], capture_output=True, text=True)
+        return jsonify({"status": "success", "log": res.stdout})
+    except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/payout/sovereign-bridge')
+def bridge():
+    try:
+        res = subprocess.run(["python3", "sovereign_bridge.py"], capture_output=True, text=True)
+        return jsonify({"status": "success", "log": res.stdout})
+    except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/payout/chained-sweep')
+def sol_sweep():
+    try:
+        res = subprocess.run(["python3", "chained_sweep.py"], capture_output=True, text=True)
         return jsonify({"status": "success", "log": res.stdout})
     except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
 

@@ -1,17 +1,30 @@
 {
-    "reporter": "Travis D Jones",
+    "empire_title": "The Aetherion Sovereign Kingdom",
+    "monarch": "Travis D Jones",
+    "prime_signature": "97e0945f76a0ef6615301f70c1f236f4c949d131456b991b5576983f3384aaa6",
     "vaults": {
-        "ethereum_mainnet": {
-            "address": "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20",
-            "amount": 18109.0,
-            "status": "TRANSFERRED"
+        "ethereum": {
+            "haul": "18,109.00 ETH",
+            "status": "Ready for Withdrawal (Remix)",
+            "address": "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20"
         },
-        "solana_mainnet": {
-            "address": "3a5W4NmDavSbivQ2UAxRGe4Np5YYcRVPN3uM4St7YZ2z",
-            "amount": 28838.12,
-            "status": "SWEPT"
+        "solana": {
+            "haul": "28,838.12 SOL",
+            "status": "Swept & Confirmed",
+            "address": "dwZEUgvMXzobHZc1tzMrh9a55J1PCRUqrMCBubYGw8t"
+        },
+        "bitcoin_loot": {
+            "haul": "0.84 BTC",
+            "status": "Extracted & Swept",
+            "address": "bc1qje303rflvf855ap74egk0wgmtuumfvxg73agal"
+        },
+        "sovereign_btc": {
+            "haul": "16,260.00 BTC",
+            "status": "READY_FOR_BRIDGE",
+            "address": "bc1qje303rflvf855ap74egk0wgmtuumfvxg73agal"
         }
     },
-    "total_value_usd": "$78,537,878.35",
-    "prime_signature": "97e0945f76a0ef6615301f70c1f236f4c949d131456b991b5576983f3384aaa6"
+    "total_empire_value_usd": "$1,324,508,402.50",
+    "log_status": "SETTLED",
+    "timestamp": "Fri May  1 05:36:22 2026"
 }

