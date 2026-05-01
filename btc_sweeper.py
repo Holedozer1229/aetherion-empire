@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-💰 AETHERION BTC SWEEPER v8.0 — The Total Sweep Edition.
-Fixed: Uncompressed vs Compressed pubkey logic and added P2SH scan.
+💰 AETHERION BTC SWEEPER v8.1 — The Total Sweep Edition.
+Fixed: P2SH-P2WPKH redeem script derivation logic.
 """
 
 import os, requests, json, re, hashlib, time
@@ -33,7 +33,7 @@ def broadcast_tx(raw_hex):
         return None
 
 def run_btc_sweep():
-    print("📡 Initializing Master BTC Sweep v8.0...")
+    print("📡 Initializing Master BTC Sweep v8.1...")
     inject_bitcoin_config()
     
     from bitcoinutils.keys import PrivateKey, PublicKey, P2shAddress
@@ -58,12 +58,16 @@ def run_btc_sweep():
         secret_int = int(priv_key_hex, 16)
 
         priv = PrivateKey(secret_exponent=secret_int)
-        pub_uncomp = priv.get_public_key()
-        pub_uncomp.compressed = False
         pub_comp = priv.get_public_key()
         pub_comp.compressed = True
+        
+        pub_uncomp = priv.get_public_key()
+        pub_uncomp.compressed = False
 
-        redeem_script = Script(['OP_0', pub_comp.get_segwit_address().to_hash160()])
+        # --- FIXED REDEEM SCRIPT LOGIC ---
+        # Nested SegWit (P2SH-P2WPKH) redeem script is 0x0014 <20-byte-pubkey-hash>
+        pubkey_hash = pub_comp.get_address().to_hash160()
+        redeem_script = Script(['OP_0', pubkey_hash])
         p2sh_nested_addr = P2shAddress(redeem_script=redeem_script)
 
         scan_targets = [
@@ -83,19 +87,21 @@ def run_btc_sweep():
             addr_str = addr_obj.to_string()
             print(f"   Checking {label}: {addr_str}...")
             
-            addr_info = requests.get(f"https://blockstream.info/api/address/{addr_str}", timeout=10).json()
-            funded = addr_info.get('chain_stats', {}).get('funded_txo_sum', 0) + addr_info.get('mempool_stats', {}).get('funded_txo_sum', 0)
-            spent = addr_info.get('chain_stats', {}).get('spent_txo_sum', 0) + addr_info.get('mempool_stats', {}).get('spent_txo_sum', 0)
-            balance = funded - spent
+            try:
+                addr_info = requests.get(f"https://blockstream.info/api/address/{addr_str}", timeout=10).json()
+                funded = addr_info.get('chain_stats', {}).get('funded_txo_sum', 0) + addr_info.get('mempool_stats', {}).get('funded_txo_sum', 0)
+                spent = addr_info.get('chain_stats', {}).get('spent_txo_sum', 0) + addr_info.get('mempool_stats', {}).get('spent_txo_sum', 0)
+                balance = funded - spent
 
-            if balance > 0:
-                print(f"   ✅ JACKPOT LOCATED: {balance/10**8} BTC found on {label}!")
-                res = requests.get(f"https://blockstream.info/api/address/{addr_str}/utxo", timeout=10)
-                found_utxos = res.json()
-                active_addr_obj = addr_obj
-                active_label = label
-                active_pub = pub_obj
-                break
+                if balance > 0:
+                    print(f"   ✅ JACKPOT LOCATED: {balance/10**8} BTC found on {label}!")
+                    res = requests.get(f"https://blockstream.info/api/address/{addr_str}/utxo", timeout=10)
+                    found_utxos = res.json()
+                    active_addr_obj = addr_obj
+                    active_label = label
+                    active_pub = pub_obj
+                    break
+            except: continue
 
         if not found_utxos:
             print("\n⚠️ Status: Zero balance detected across all 4 major address formats.")
