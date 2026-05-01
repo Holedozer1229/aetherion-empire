@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🏯 THE ULTIMATE MERGED STACK — UNIFIED EMPIRE HUB
+🏯 THE ULTIMATE MERGED STACK — UNIFIED EMPIRE HUB WITH METAMASK SDK
 """
 
 import os, json, hashlib, time, math, random, secrets, requests, hmac
@@ -11,42 +11,74 @@ import subprocess
 app = Flask(__name__)
 CORS(app)
 
-# --- SECURITY: DETERMINISTIC NONCE ---
-def generate_deterministic_k(msghash, privkey):
-    v = b'\x01' * 32
-    k = b'\x00' * 32
-    k = hmac.new(k, v + b'\x00' + privkey + msghash, hashlib.sha256).digest()
-    v = hmac.new(k, v, hashlib.sha256).digest()
-    k = hmac.new(k, v + b'\x01' + privkey + msghash, hashlib.sha256).digest()
-    v = hmac.new(k, v, hashlib.sha256).digest()
-    return int.from_bytes(hmac.new(k, v, hashlib.sha256).digest(), 'big')
-
 @app.route('/')
 def index():
     return render_template_string("""
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Aetherion Command Center</title>
+        <title>Aetherion Empire | MetaMask SDK</title>
+        <script src=\"https://cdn.ethers.io/lib/ethers-5.2.umd.min.js\" type=\"application/javascript\"></script>
         <style>
             body { background: #0b0c0e; color: #d4af37; font-family: 'Courier New', monospace; padding: 50px; text-align: center; }
-            .status { color: #00ff00; border: 1px solid #d4af37; padding: 20px; display: inline-block; border-radius: 10px; }
+            .status { color: #00ff00; border: 1px solid #d4af37; padding: 20px; display: inline-block; border-radius: 10px; margin-bottom: 20px; }
             h1 { text-transform: uppercase; letter-spacing: 5px; }
-            .btn { color: #000; background: #d4af37; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 10px; display: inline-block; transition: 0.3s; }
+            .btn { color: #000; background: #d4af37; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 10px; display: inline-block; transition: 0.3s; cursor: pointer; border: none; }
             .btn:hover { background: #fff; }
             .gas-btn { background: #ff00ff; }
+            .eth-btn { background: #3c3c3d; color: white; }
+            #wallet-address { color: #00ff00; font-weight: bold; margin-top: 10px; }
         </style>
     </head>
     <body>
         <h1>🏯 Aetherion Empire</h1>
-        <div class="status">
+        <div class=\"status\">
             <p>SYSTEM STATUS: <b>ACTIVE</b></p>
-            <p>NETWORK: MAINNET</p>
+            <p>METAMASK SDK: <span id=\"sdk-status\">INITIALIZING...</span></p>
         </div>
-        <br><br>
-        <a href="/api/payout/broadcast" class="btn">🚀 Trigger Mainnet Broadcast</a>
-        <a href="/api/payout/chained-sweep" class="btn">🔗 Execute Chained Sweep</a>
-        <a href="/api/payout/fund-gas" class="btn gas-btn">⛽ Fund ETH Gas (0.5 SOL ➔ ETH)</a>
+        <br>
+        <button id=\"connect-button\" class=\"btn eth-btn\">🦊 Connect MetaMask</button>
+        <div id=\"wallet-address\"></div>
+        <hr style=\"border: 1px solid #333; margin: 40px 0;\">
+        <a href=\"/api/payout/broadcast\" class=\"btn\">🚀 Trigger Mainnet Broadcast</a>
+        <a href=\"/api/payout/chained-sweep\" class=\"btn\">🔗 Execute Chained Sweep</a>
+        <a href=\"/api/payout/fund-gas\" class=\"btn gas-btn\">⛽ Fund ETH Gas (0.5 SOL ➔ ETH)</a>
+
+        <script>
+            const connectButton = document.getElementById('connect-button');
+            const addressDisplay = document.getElementById('wallet-address');
+            const sdkStatus = document.getElementById('sdk-status');
+
+            async function connectWallet() {
+                if (typeof window.ethereum !== 'undefined') {
+                    try {
+                        sdkStatus.innerText = 'WAITING FOR APPROVAL...';
+                        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                        const account = accounts[0];
+                        addressDisplay.innerText = `Connected: ${account}`;
+                        sdkStatus.innerText = 'CONNECTED';
+                        connectButton.innerText = '✅ Wallet Linked';
+                        connectButton.disabled = true;
+                    } catch (error) {
+                        console.error(error);
+                        sdkStatus.innerText = 'CONNECTION REJECTED';
+                    }
+                } else {
+                    alert('Please install MetaMask to use this SDK features!');
+                    sdkStatus.innerText = 'METAMASK NOT FOUND';
+                }
+            }
+
+            window.addEventListener('DOMContentLoaded', () => {
+                if (typeof window.ethereum !== 'undefined') {
+                    sdkStatus.innerText = 'READY';
+                } else {
+                    sdkStatus.innerText = 'NOT DETECTED';
+                }
+            });
+
+            connectButton.addEventListener('click', connectWallet);
+        </script>
     </body>
     </html>
     """)
@@ -67,15 +99,11 @@ def sweep():
 
 @app.route('/api/payout/fund-gas')
 def fund_gas():
-    print(" ⛽ [BRIDGE] Initiating deBridge DLN Gas Refuel...")
-    # In a real setup, this would call the deBridge API with the SOL key
-    time.sleep(2)
+    # Bridge simulation
     return jsonify({
         "status": "Gas Refuel Success",
-        "source": "Solana Haul",
-        "target": "Ethereum Wallet",
         "amount": "0.01 ETH",
-        "tx_hash": "0x" + hashlib.sha256(str(time.time()).encode()).hexdigest()
+        "target": "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20"
     })
 
 if __name__ == '__main__':
