@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-💰 AETHERION BTC SWEEPER v6.0 — The Master Extraction Protocol.
-Final Fix: Implements full signing logic and robust hex-key loading.
+💰 AETHERION BTC SWEEPER v6.1 — Import Correction Edition.
+Fixed: P2WPKHAddress import and signing witness construction.
 """
 
 import os, requests, json
@@ -10,7 +10,7 @@ import os, requests, json
 def inject_bitcoin_config():
     try:
         import bitcoinutils.constants as constants
-        # Manually setting Mainnet constants to bypass Render filesystem errors
+        # Manually setting Mainnet constants for Render
         constants.NETWORK_WIF_PREFIX = b'\x80'
         constants.NETWORK_P2PKH_PREFIX = b'\x00'
         constants.NETWORK_P2SH_PREFIX = b'\x05'
@@ -20,14 +20,14 @@ def inject_bitcoin_config():
         print(f"⚠️ Config Injection Warning: {e}")
 
 def run_btc_sweep():
-    print("📡 Initializing Master BTC Sweep...")
+    print("📡 Initializing Master BTC Sweep v6.1...")
     inject_bitcoin_config()
     
-    from bitcoinutils.keys import PrivateKey, P2WPKHAddress
+    from bitcoinutils.keys import PrivateKey
+    from bitcoinutils.address import P2WPKHAddress
     from bitcoinutils.transactions import Transaction, TxInput, TxOutput
     from bitcoinutils.setup import setup
     
-    # Ensuring the library is in mainnet mode
     try: setup('mainnet')
     except: pass 
 
@@ -39,53 +39,51 @@ def run_btc_sweep():
         return
 
     try:
-        # 1. Robust Hex Key Loading
+        # 1. Key Loading
         clean_key = raw_key.strip().replace('"', '').replace("'", "")
         if clean_key.lower().startswith('0x'): clean_key = clean_key[2:]
         
-        # Initialize PrivateKey with the secret exponent (hex), NOT WIF
         priv = PrivateKey(secret_exponent=int(clean_key, 16))
         pub = priv.get_public_key()
         
-        # We use a SegWit (P2WPKH) address for the extraction
-        address = pub.get_segwit_address().to_string()
-        print(f"🎯 Origin Address: {address} | Destination: {dest_addr}")
+        # Correct address derivation for P2WPKH
+        address_obj = pub.get_segwit_address()
+        address_str = address_obj.to_string()
+        print(f"🎯 Origin Address: {address_str} | Destination: {dest_addr}")
 
-        # 2. Fetch real UTXOs
-        print(f"🔍 Scanning {address} for unconfirmed inputs...")
-        utxo_res = requests.get(f"https://blockstream.info/api/address/{address}/utxo")
+        # 2. UTXO Fetching
+        print(f"🔍 Scanning {address_str} for unconfirmed inputs...")
+        utxo_res = requests.get(f"https://blockstream.info/api/address/{address_str}/utxo")
         utxos = utxo_res.json()
         
         if not utxos:
             print("⚠️ Error: No spendable UTXOs found in the mempool.")
             return
 
-        # 3. Construct Inputs & Signatures
+        # 3. Transaction Building
         tx_inputs = []
         total_val = 0
         for u in utxos:
             tx_inputs.append(TxInput(u['txid'], u['vout']))
             total_val += u['value']
 
-        # High fee for 2026 mempool priority
         fee = 10000 
         out_val = total_val - fee
         tx_outputs = [TxOutput(out_val, dest_addr)]
 
         tx = Transaction(tx_inputs, tx_outputs, has_segwit=True)
-        
         print(f"✅ {len(tx_inputs)} Input(s) confirmed. Total: {total_val / 10**8} BTC")
 
-        # 4. SIGNING (The 'Real Deal' Move)
-        # For each input, we must sign using the specific scriptPubKey
+        # 4. SIGNING
+        # Segwit signing requires the script code (p2pkh script inside p2wpkh)
+        script_code = pub.get_segwit_address().to_script_pub_key()
+        
         for i, u in enumerate(utxos):
-            # In Blockstream API, we need the scriptpubkey to sign
-            # For P2WPKH, the script is just the pubkey hash
-            script_code = pub.get_segwit_address().to_script_pub_key()
             sig = priv.sign_segwit_input(tx, i, script_code, u['value'])
-            tx_inputs[i].witness = [sig, pub.to_hex()]
+            # In Segwit, witness = [signature, pubkey]
+            tx.witnesses.append([sig, pub.to_hex()])
 
-        # 5. Final Broadcast Ready Hex
+        # 5. Output Signed Hex
         signed_hex = tx.serialize()
         
         print(f"\n✅ SIGNED RAW HEX GENERATED!")
