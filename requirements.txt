@@ -1,9 +1,8 @@
 flask
 flask-cors
 requests
-numpy
 solders
 base58
 cryptography
 eth-abi
-bit
+bitcoin-utils
