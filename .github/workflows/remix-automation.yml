@@ -11,15 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Solidity Compiler
-        uses: niklasvg/solc-action@v1
-        with:
-          solc-version: '0.8.19'
+      - name: Install Solidity Compiler (solc v0.8.19)
+        run: |
+          sudo wget -O /usr/bin/solc https://github.com/ethereum/solidity/releases/download/v0.8.19/solc-static-linux
+          sudo chmod +x /usr/bin/solc
+          solc --version
 
       - name: Build Empire Contract
         run: |
           mkdir -p build
-          # Direct compilation of the final contract
           solc --bin --abi AetherionFlashHaul_Final.sol -o build/
 
       - name: Archive Artifacts
