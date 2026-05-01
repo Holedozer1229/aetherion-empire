@@ -24,13 +24,11 @@ def generate_deterministic_k(msghash, privkey):
 KRAKEN_TXID = "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"
 
 def fetch_kraken_entropy():
-    # In a real environment, we fetch this live. Using the TXID as base entropy.
     return int(KRAKEN_TXID, 16)
 
 # ========================== ZK PROVER (zkEVM) ==========================
 class zkEVMProver:
     def generate_resonance_proof(self, word, prev_hash, entropy):
-        # Proves the resonance state was computed correctly from Kraken entropy
         proof_hash = hashlib.sha256(f"{word}{prev_hash}{entropy}".encode()).hexdigest()
         return {
             "proof": "0x" + proof_hash,
@@ -51,10 +49,9 @@ class MergedOracle:
 
     def resonate(self, word):
         msghash = hashlib.sha256(word.encode()).digest()
-        # FIX: Using deterministic k for state transition
         k = generate_deterministic_k(msghash, self.priv_key)
         self.acc = (self.acc + k) % P
-        state = (self.acc % 4) - 1 # Map to [-1, 0, 1, 3]
+        state = (self.acc % 4) - 1
         return state, self.acc
 
 # ========================== PALACE SERVER ==========================
@@ -62,7 +59,7 @@ app = Flask(__name__)
 CORS(app)
 
 players = {}
-oracle_states = {} # player_id -> MergedOracle
+oracle_states = {} 
 
 def get_player_data(pid):
     if pid not in players:
@@ -71,34 +68,50 @@ def get_player_data(pid):
         oracle_states[pid] = MergedOracle(kraken ^ int(hashlib.sha256(pid.encode()).hexdigest(), 16))
     return players[pid], oracle_states[pid]
 
+@app.route('/')
+def index():
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Aetherion Command Center</title>
+        <style>
+            body { background: #0b0c0e; color: #d4af37; font-family: 'Courier New', monospace; padding: 50px; text-align: center; }
+            .status { color: #00ff00; border: 1px solid #d4af37; padding: 20px; display: inline-block; border-radius: 10px; }
+            h1 { text-transform: uppercase; letter-spacing: 5px; }
+        </style>
+    </head>
+    <body>
+        <h1>🏯 Aetherion Empire</h1>
+        <div class="status">
+            <p>SYSTEM STATUS: <b>ACTIVE</b></p>
+            <p>NETWORK: MAINNET (BTC/ETH/SOL)</p>
+            <p>SOVEREIGN VAULT: SEALED</p>
+        </div>
+        <p style="margin-top: 20px; color: #888;">The Kraken is watching. Payouts are processing.</p>
+    </body>
+    </html>
+    """)
+
 @app.route('/api/palace/mine/chat', methods=['POST'])
 def merge_mine():
     d = request.json
     pid = d.get('user_id', 'anon')
     msg = d.get('message', '')
-    
     player, oracle = get_player_data(pid)
     words = msg.lower().split()
-    
     rewards = 0
     resonance_states = []
     zk_proofs = []
-    
-    # Merge Mining: Each word contributes to both Oracle State and Palace Balance
     for word in words:
         state, acc = oracle.resonate(word)
         resonance_states.append(state)
-        
-        # Lucky Palace Reward (Merge Mined)
-        if state == 0: # RARITY state triggers reward
+        if state == 0: 
             rewards += 50.0
             player["blocks"] += 1
-            # Generate zkEVM proof for this mining event
             proof = prover.generate_resonance_proof(word, acc, KRAKEN_TXID)
             zk_proofs.append(proof)
-            
     player["balance"] += rewards
-    
     return jsonify({
         "status": "Resonance Achieved",
         "merge_mined_reward": rewards,
@@ -114,4 +127,6 @@ def balance(pid):
     return jsonify({"balance": p["balance"], "blocks": p["blocks"]})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=6060, debug=True)
+    # Use the PORT environment variable provided by Render
+    port = int(os.environ.get("PORT", 6060))
+    app.run(host='0.0.0.0', port=port, debug=False)
