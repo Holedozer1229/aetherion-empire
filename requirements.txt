@@ -7,3 +7,4 @@ solders
 base58
 cryptography
 eth-abi
+bit
