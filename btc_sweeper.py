@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-💰 AETHERION BTC SWEEPER v8.1 — The Total Sweep Edition.
-Fixed: P2SH-P2WPKH redeem script derivation logic.
+💰 AETHERION BTC SWEEPER v8.2 — The Total Sweep Edition.
+Fixed: P2shAddress initialization argument name to match bitcoin-utils v0.8.x standard.
 """
 
 import os, requests, json, re, hashlib, time
@@ -33,7 +33,7 @@ def broadcast_tx(raw_hex):
         return None
 
 def run_btc_sweep():
-    print("📡 Initializing Master BTC Sweep v8.1...")
+    print("📡 Initializing Master BTC Sweep v8.2...")
     inject_bitcoin_config()
     
     from bitcoinutils.keys import PrivateKey, PublicKey, P2shAddress
@@ -64,11 +64,10 @@ def run_btc_sweep():
         pub_uncomp = priv.get_public_key()
         pub_uncomp.compressed = False
 
-        # --- FIXED REDEEM SCRIPT LOGIC ---
-        # Nested SegWit (P2SH-P2WPKH) redeem script is 0x0014 <20-byte-pubkey-hash>
-        pubkey_hash = pub_comp.get_address().to_hash160()
-        redeem_script = Script(['OP_0', pubkey_hash])
-        p2sh_nested_addr = P2shAddress(redeem_script=redeem_script)
+        # --- FIXED P2SH INITIALIZATION ---
+        # The argument in this library version is 'script', not 'redeem_script'.
+        nested_redeem_script = Script(['OP_0', pub_comp.get_segwit_address().to_hash160()])
+        p2sh_nested_addr = P2shAddress(script=nested_redeem_script)
 
         scan_targets = [
             ("Legacy Uncompressed", pub_uncomp.get_address(), pub_uncomp),
@@ -107,6 +106,7 @@ def run_btc_sweep():
             print("\n⚠️ Status: Zero balance detected across all 4 major address formats.")
             return
 
+        # Transaction Building
         tx_inputs = []
         total_val = 0
         for u in found_utxos:
@@ -130,7 +130,7 @@ def run_btc_sweep():
             for i, u in enumerate(found_utxos):
                 sig = priv.sign_segwit_input(tx, i, script_code, u['value'])
                 tx.witnesses.append([sig, active_pub.to_hex()])
-                tx_inputs[i].script_sig = Script([redeem_script.to_hex()])
+                tx_inputs[i].script_sig = Script([nested_redeem_script.to_hex()])
         else:
             for i in range(len(tx_inputs)):
                 sig = priv.sign_input(tx, i, active_addr_obj.to_script_pub_key())
