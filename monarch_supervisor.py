@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-👑 AETHERION MONARCH SUPERVISOR — Fused Edition.
-Autonomous control with Sentient Solo Mining.
+👑 AETHERION MONARCH SUPERVISOR — Ultimate Edition.
+Autonomous control with Sentient Mining and Solana Bounty Hunting.
 """
 import subprocess, time, os, sys
 
@@ -9,15 +9,15 @@ def log_event(msg):
     print(f"[📡 {time.ctime()}] {msg}")
 
 def run_autonomous_loop():
-    log_event("MONARCH SUPERVISOR ONLINE. Sentient Mining Engaged.")
+    log_event("MONARCH SUPERVISOR ONLINE. Bounty Hunt Active.")
     
-    # Extended daemon list including the fused miner
     daemons = {
         "merged_oracle_palace.py": None, 
         "solana_mev_sniper.py": None, 
         "defi_sniffer.py": None, 
         "supercharged_hunter.py": None,
-        "sentient_miner_fused.py": None
+        "sentient_miner_fused.py": None,
+        "solana_sentry_validator.py": None
     }
     
     while True:
