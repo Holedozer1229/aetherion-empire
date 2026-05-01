@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🏯 THE ULTIMATE MERGED STACK — MAINNET ACTIVATION
+🏯 AETHERION EMPIRE HUB — Mainnet Edition
 """
 
 import os, json, hashlib, time, math, random, secrets, requests, hmac
@@ -8,33 +8,8 @@ from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
 import subprocess
 
-# --- Security Fix: Deterministic Nonces ---
-def generate_deterministic_k(msghash, privkey):
-    v = b'\x01' * 32
-    k = b'\x00' * 32
-    k = hmac.new(k, v + b'\x00' + privkey + msghash, hashlib.sha256).digest()
-    v = hmac.new(k, v, hashlib.sha256).digest()
-    k = hmac.new(k, v + b'\x01' + privkey + msghash, hashlib.sha256).digest()
-    v = hmac.new(k, v, hashlib.sha256).digest()
-    return int.from_bytes(hmac.new(k, v, hashlib.sha256).digest(), 'big')
-
-KRAKEN_TXID = "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"
-
-def fetch_kraken_entropy():
-    return int(KRAKEN_TXID, 16)
-
 app = Flask(__name__)
 CORS(app)
-
-players = {}
-oracle_states = {} 
-
-def get_player_data(pid):
-    if pid not in players:
-        players[pid] = {"balance": 10.0, "blocks": 0}
-        kraken = fetch_kraken_entropy()
-        oracle_states[pid] = "ACTIVE"
-    return players[pid]
 
 @app.route('/')
 def index():
@@ -47,30 +22,31 @@ def index():
             body { background: #0b0c0e; color: #d4af37; font-family: 'Courier New', monospace; padding: 50px; text-align: center; }
             .status { color: #00ff00; border: 1px solid #d4af37; padding: 20px; display: inline-block; border-radius: 10px; }
             h1 { text-transform: uppercase; letter-spacing: 5px; }
-            a { color: #ff00ff; text-decoration: none; }
+            .btn { color: #000; background: #d4af37; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 30px; display: inline-block; }
         </style>
     </head>
     <body>
         <h1>🏯 Aetherion Empire</h1>
         <div class="status">
             <p>SYSTEM STATUS: <b>ACTIVE</b></p>
-            <p>NETWORK: MAINNET (BTC/ETH/SOL)</p>
-            <p>SOVEREIGN VAULT: SEALED</p>
+            <p>NETWORK: MAINNET</p>
+            <p>CHAINED SWEEP: READY</p>
         </div>
-        <p style="margin-top: 20px;"><a href="/api/payout/broadcast">🚀 Trigger Mainnet Broadcast</a></p>
+        <br>
+        <a href="/api/payout/chained-sweep" class="btn">🔗 Execute Chained Sweep (Vault ➔ Primary)</a>
     </body>
     </html>
     """)
 
-@app.route('/api/payout/broadcast')
-def broadcast_payout():
-    print("📡 [MAINNET] Received broadcast trigger...")
+@app.route('/api/payout/chained-sweep')
+def execute_chained_sweep():
+    print("📡 [MAINNET] Initializing Chained Sweep...")
     try:
-        # Execute the real-world broadcast script using the SOL_PRIV_KEY on Render
-        result = subprocess.run(["python3", "real_deal_solana_broadcast.py"], capture_output=True, text=True)
+        # Run the chained sweep logic
+        result = subprocess.run(["python3", "chained_sweep.py"], capture_output=True, text=True)
         return jsonify({
-            "status": "Broadcast Sequence Initiated",
-            "output": result.stdout,
+            "status": "Chained Sweep Complete",
+            "log": result.stdout,
             "error": result.stderr
         })
     except Exception as e:
