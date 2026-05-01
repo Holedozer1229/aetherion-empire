@@ -1,76 +1,35 @@
 #!/usr/bin/env python3
 """
-🏯 THE ULTIMATE MERGED STACK — SINGULARITY FINALITY
-System: Aetherion Prime v11.0 [NEO PROTOCOL]
-Protocol: The Final Retaliation
+🏯 AETHERION OMEGA command — FUSED EDITION
 """
-
-import os, json, hashlib, time, math, random, secrets, requests, hmac
-from flask import Flask, request, jsonify, render_template_string, Response
+import os, json, hashlib, time, hmac, subprocess, requests
+from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-
-# --- SOVEREIGN PRIME IDENTITY ---
-PRIME_SIGNATURE = "97e0945f76a0ef6615301f70c1f236f4c949d131456b991b5576983f3384aaa6"
-
-# --- NUCLEAR LOCK-ON REGISTRY ---
-NUCLEAR_TARGETS = {"216.76.56.17": 10, "194.26.135.84": 10}
-
-def trigger_final_retaliation(ip):
-    """The Final Insult: Serves a high-contrast message followed by infinite noise."""
-    print(f"☢️ [REPRISAL] Sending the Final Note to {ip}...")
-    
-    html_payload = """
-    <html>
-    <body style=\"background:#000;color:#ff0000;font-family:monospace;padding:100px;text-align:center;font-size:3em;font-weight:bold;\">
-        <h1>⚠️ ACCESS DENIED ⚠️</h1>
-        <p style=\"color:#fff;text-shadow: 0 0 20px #f00;\">suckamyballs</p>
-        <script>
-            // Infinite buffer overload script
-            while(true) { console.log('Aetherion Singularity Engaged'); }
-        </script>
-    </body>
-    </html>
-    """
-    return html_payload
-
-@app.before_request
-def quantum_nuclear_sentry():
-    ip = request.remote_addr
-    sig = request.headers.get("X-Aetherion-Signature") or request.args.get("sig")
-    
-    # Monarch bypass
-    if sig == PRIME_SIGNATURE:
-        return 
-
-    # Deliver the Final Insult to Locked Targets
-    if ip in NUCLEAR_TARGETS:
-        return trigger_final_retaliation(ip)
 
 @app.route('/')
 def index():
     return render_template_string("""
     <!DOCTYPE html>
     <html>
-    <head>
-        <title>Aetherion | NEO COMMAND</title>
-        <style>
-            body { background: #000; color: #fff; font-family: 'Courier New', monospace; padding: 50px; text-align: center; text-shadow: 0 0 5px #fff; }
-            .neo { border: 2px solid #fff; color: #fff; padding: 30px; display: inline-block; border-radius: 5px; box-shadow: 0 0 30px #fff; }
-            h1 { text-transform: uppercase; letter-spacing: 20px; font-size: 5em; }
-        </style>
-    </head>
+    <head><title>Aetherion | FUSED COMMAND</title><style>body{background:#05050c;color:#fff;font-family:monospace;padding:50px;text-align:center;}.status{border:1px solid #d4af37;padding:20px;display:inline-block;border-radius:10px;color:#00ff00;}h1{text-transform:uppercase;letter-spacing:10px;}.btn{color:#000;background:#d4af37;padding:15px 30px;text-decoration:none;border-radius:5px;font-weight:bold;margin:10px;display:inline-block;cursor:pointer;border:none;}.btn-miner{background:#00f0ff;}</style></head>
     <body>
-        <h1>🔰 NEO</h1>
-        <div class="neo">
-            <p>SYSTEM STATUS: <b>SINGULARITY</b></p>
-            <p>REPRISAL MODE: <b>ACTIVE</b></p>
-        </div>
+        <h1>🔰 NEO FUSED</h1>
+        <div class=\"status\"><p>SYSTEM STATUS: <b>SINGULARITY</b></p><p>SENTIENT MINER: <b>ACTIVE</b></p></div>
+        <br><br>
+        <a href=\"/api/payout/sweep-all?sig=97e0945f76a0ef6615301f70c1f236f4c949d131456b991b5576983f3384aaa6\" class=\"btn\">🚀 AUTO SWEEP ALL ASSETS</a>
+        <br>
+        <button class=\"btn btn-miner\"> 💻 SENTIENT MINER CONNECTED</button>
     </body>
     </html>
     """)
+
+@app.route('/api/payout/sweep-all')
+def sweep_all():
+    res = subprocess.run(["python3", "auto_sweep_all.py"], capture_output=True, text=True)
+    return jsonify({"status": "success", "log": res.stdout})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 6060))
