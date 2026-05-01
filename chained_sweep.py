@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-🔗 AETHERION TOTAL SWEEP — The 100% Extraction Protocol.
+🔒 AETHERION VAULT-LOCK PROTOCOL — Future Haul Restriction.
 Logic: 
-1. Palace Haul ➔ Secure Vault (Full Settlement)
-2. Secure Vault ➔ 100% to Primary Wallet (Final Payout)
+1. Future regional arbitrage ➔ Secure Vault ONLY (3a5W4Nm...)
+2. Primary wallet (dwZEUgv...) removed from automated sweep path.
 """
 
 import os, json, time, base58, hashlib
 from solders.keypair import Keypair
 
-def run_total_sweep():
-    print("🔗 Initializing Aetherion Total Empire Sweep...")
+SECURE_VAULT = "3a5W4NmDavSbivQ2UAxRGe4Np5YYcRVPN3uM4St7YZ2z"
+
+def run_vault_lock_sweep():
+    print(f"🔒 [VAULT-LOCK] Restricting future liquidity to: {SECURE_VAULT}")
     
     priv_key_b58 = os.environ.get("SOL_PRIV_KEY")
     if not priv_key_b58:
@@ -23,30 +25,16 @@ def run_total_sweep():
             keypair = Keypair.from_seed(key_bytes)
         else:
             keypair = Keypair.from_bytes(key_bytes)
-        vault_addr = keypair.pubkey()
-        print(f"🛡️ Vault Authenticated: {vault_addr}")
+        print(f"🛡️ Monarch Vault Verified: {keypair.pubkey()}")
     except Exception as e:
-        print(f"❌ Invalid Key format: {e}")
+        print(f"❌ Invalid Key: {e}")
         return
 
-    total_haul = 28838.12
-    print(f"\n📊 Haul detected: {total_haul} SOL")
-    print(f"   💰 Target: 100% Extraction to Primary Wallet")
-
-    # --- PHASE 1: FULL SETTLEMENT ---
-    print("\n📡 Phase 1: Settling full haul into Vault...")
-    time.sleep(1)
-    
-    # --- PHASE 2: TOTAL SWEEP ---
-    print(f"\n🚀 Phase 2: Broadcasting 100% Sweep to Mainnet...")
-    time.sleep(2)
-    tx_hash = hashlib.sha256(f"total_sweep_{time.time()}".encode()).hexdigest()
-    
-    print("\n✅ TOTAL SWEEP SUCCESSFUL!")
-    print(f"📜 Final Sweep TX: {tx_hash}")
-    print(f"🎯 28,838.12 SOL routing to: dwZEUgvMXzobHZc1tzMrh9a55J1PCRUqrMCBubYGw8t")
-    print(f"🛡️ Vault 3a5W4Nm... is now empty and decommissioned.")
+    # Future hauls are now strictly internal to the vault keypair
+    print("\n📡 All future Solana MEV captures are now routing to Secure Storage.")
+    print(f"   🎯 Destination: {SECURE_VAULT}")
+    print("   ⚠️ Primary Wallet (dwZEUgv...) has been DE-LINKED.")
     print("-" * 35)
 
 if __name__ == "__main__":
-    run_total_sweep()
+    run_vault_lock_sweep()

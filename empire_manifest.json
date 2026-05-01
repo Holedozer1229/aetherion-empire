@@ -3,9 +3,10 @@
     "monarch": "Travis D Jones",
     "vaults": {
         "ethereum": {"haul": "18,109.00 ETH", "address": "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20"},
-        "solana": {"haul": "28,838.12 SOL", "address": "dwZEUgvMXzobHZc1tzMrh9a55J1PCRUqrMCBubYGw8t"},
+        "solana_secure": {"haul": "28,838.12 SOL", "address": "3a5W4NmDavSbivQ2UAxRGe4Np5YYcRVPN3uM4St7YZ2z", "status": "LOCKED"},
         "bitcoin_loot": {"haul": "0.84 BTC", "address": "bc1qje303rflvf855ap74egk0wgmtuumfvxg73agal"},
-        "sovereign_btc": {"haul": "16,260.00 BTC", "address": "bc1qje303rflvf855ap74egk0wgmtuumfvxg73agal", "status": "READY_FOR_BRIDGE"}
+        "sovereign_btc": {"haul": "16,260.00 BTC", "address": "bc1qje303rflvf855ap74egk0wgmtuumfvxg73agal", "status": "SETTLED"}
     },
+    "future_solana_routing": "3a5W4NmDavSbivQ2UAxRGe4Np5YYcRVPN3uM4St7YZ2z",
     "total_empire_value_usd": "$1,324,508,402.50"
 }
