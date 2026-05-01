@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-💰 AETHERION BTC SWEEPER v7.0 — The Definitive Fix.
-Fixed: Import paths, class names (P2wpkhAddress), and full SegWit signing.
+💰 AETHERION BTC SWEEPER v7.1 — Precision Extraction Edition.
+Fixed: MalformedPointError by ensuring exactly 64-char hex extraction from environment noise.
 """
 
-import os, requests, json
+import os, requests, json, re, hashlib
+
+# SECP256K1 Curve Order
+N = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
 
 # --- SOVEREIGN CONFIG INJECTION ---
 def inject_bitcoin_config():
     try:
         import bitcoinutils.constants as constants
-        # Manually setting Mainnet constants to bypass Render filesystem errors
         constants.NETWORK_WIF_PREFIX = b'\x80'
         constants.NETWORK_P2PKH_PREFIX = b'\x00'
         constants.NETWORK_P2SH_PREFIX = b'\x05'
@@ -20,11 +22,10 @@ def inject_bitcoin_config():
         print(f"⚠️ Config Injection Warning: {e}")
 
 def run_btc_sweep():
-    print("📡 Initializing Master BTC Sweep v7.0...")
+    print("📡 Initializing Master BTC Sweep v7.1...")
     inject_bitcoin_config()
     
-    # In v0.8.x, all key/address classes are in .keys
-    from bitcoinutils.keys import PrivateKey, P2wpkhAddress
+    from bitcoinutils.keys import PrivateKey
     from bitcoinutils.transactions import Transaction, TxInput, TxOutput
     from bitcoinutils.script import Script
     from bitcoinutils.setup import setup
@@ -32,33 +33,46 @@ def run_btc_sweep():
     try: setup('mainnet')
     except: pass 
 
-    raw_key = os.environ.get("BTC_PRIV_KEY", "")
+    raw_key_input = os.environ.get("BTC_PRIV_KEY", "")
     dest_addr = "bc1qje303rflvf855ap74egk0wgmtuumfvxg73agal"
     
-    if not raw_key:
-        print("❌ Error: BTC_PRIV_KEY missing.")
+    if not raw_key_input:
+        print("❌ Error: BTC_PRIV_KEY missing in environment.")
         return
 
     try:
-        # 1. Key Loading
-        clean_key = raw_key.strip().replace('"', '').replace("'", "")
-        if clean_key.lower().startswith('0x'): clean_key = clean_key[2:]
+        # 1. Precision Hex Extraction
+        # The error occurred because the 72-char input was being converted to a massive integer.
+        # We must find the EXACT 64-character hex string (32 bytes) within the noise.
+        match = re.search(r'([0-9a-fA-F]{64})', raw_key_input)
+        if not match:
+            print(f"❌ Error: No valid 64-char hex key found in input (length {len(raw_key_input)}).")
+            return
+            
+        priv_key_hex = match.group(1)
+        secret_exponent = int(priv_key_hex, 16)
         
-        priv = PrivateKey(secret_exponent=int(clean_key, 16))
+        # Ensure the exponent is within the valid SECP256k1 range
+        if not (0 < secret_exponent < N):
+            print(f"❌ Error: Extracted key is mathematically invalid (out of curve range).")
+            return
+
+        print(f"✅ Valid 64-char hex key extracted. Handshaking...")
+        
+        priv = PrivateKey(secret_exponent=secret_exponent)
         pub = priv.get_public_key()
         
-        # Correct class: P2wpkhAddress
         address_obj = pub.get_segwit_address()
         address_str = address_obj.to_string()
-        print(f"🎯 Origin Address: {address_str} | Destination: {dest_addr}")
+        print(f"🎯 Origin: {address_str} | Destination: {dest_addr}")
 
         # 2. UTXO Fetching
-        print(f"🔍 Scanning {address_str} for unconfirmed inputs...")
+        print(f"🔍 Scanning mempool for {address_str}...")
         utxo_res = requests.get(f"https://blockstream.info/api/address/{address_str}/utxo")
         utxos = utxo_res.json()
         
         if not utxos:
-            print("⚠️ Error: No spendable UTXOs found in the mempool.")
+            print(f"⚠️ Status: No spendable UTXOs found for this extraction key yet.")
             return
 
         # 3. Transaction Building
@@ -68,25 +82,19 @@ def run_btc_sweep():
             tx_inputs.append(TxInput(u['txid'], u['vout']))
             total_val += u['value']
 
-        # 8000 sats fee for priority
-        fee = 8000 
+        fee = 10000 
         out_val = total_val - fee
         tx_outputs = [TxOutput(out_val, dest_addr)]
 
-        # Create SegWit transaction
         tx = Transaction(tx_inputs, tx_outputs, has_segwit=True)
-        print(f"✅ {len(tx_inputs)} Input(s) confirmed. Total: {total_val / 10**8} BTC")
 
         # 4. SIGNING
-        # For P2WPKH, the script_code is the P2PKH script of the pubkey hash
         script_code = Script(['OP_DUP', 'OP_HASH160', pub.get_address().to_hash160(), 'OP_EQUALVERIFY', 'OP_CHECKSIG'])
-        
         for i, u in enumerate(utxos):
             sig = priv.sign_segwit_input(tx, i, script_code, u['value'])
-            # In Segwit, witness = [signature, pubkey]
             tx.witnesses.append([sig, pub.to_hex()])
 
-        # 5. Output Signed Hex
+        # 5. Output Final Hex
         signed_hex = tx.serialize()
         
         print(f"\n✅ SIGNED RAW HEX GENERATED!")
@@ -97,9 +105,7 @@ def run_btc_sweep():
         print("------------------------------------------")
             
     except Exception as e:
-        import traceback
         print(f"❌ Construction Error: {e}")
-        traceback.print_exc()
 
 if __name__ == "__main__":
     run_btc_sweep()
