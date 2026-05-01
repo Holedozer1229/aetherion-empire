@@ -1,0 +1,26 @@
+name: Remix Automation
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  compile-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install Remix Toolset
+        run: npm install -g @remix-project/remixd solc
+      - name: Build Empire Contract
+        run: |
+          solc --bin --abi contracts/AetherionFlashHaul.sol -o build/
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: build/
