@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-🏯 THE ULTIMATE MERGED STACK — OMEGA COMMAND v2.0
-Fixed: Monarch Protection. The Kraken now recognizes Travis D Jones and only wipes intruders.
+🏯 THE ULTIMATE MERGED STACK — QUANTUM NUCLEAR HUB
+System: Aetherion Prime v9.0
+Protocol: Nuclear Retaliation / Sovereign Honey-Pot
 """
 
 import os, json, hashlib, time, math, random, secrets, requests, hmac
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, Response
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -17,6 +18,10 @@ CORS(app)
 # --- SOVEREIGN PRIME IDENTITY ---
 PRIME_SIGNATURE = "97e0945f76a0ef6615301f70c1f236f4c949d131456b991b5576983f3384aaa6"
 
+# --- QUANTUM DEFENSE REGISTRY ---
+NUCLEAR_TARGETS = {} # ip -> severity
+THRESHOLD_DECAY = 3
+
 # --- 1000% POWER LOCKING ---
 limiter = Limiter(
     get_remote_address,
@@ -25,43 +30,38 @@ limiter = Limiter(
     storage_uri="memory://",
 )
 
-# --- LOCK-ON & SELECTIVE WIPE ---
-ATTACK_BLACKBOX = {} # ip -> score
-PERMANENT_BLACKLIST = set()
-
-def execute_targeted_wipe(ip):
-    """Selective Memory Wipe: Neutralizes the attacker's path without affecting the Monarch."""
-    print(f"🔥 [WIPE] Neutralizing Attacker IP: {ip}")
-    PERMANENT_BLACKLIST.add(ip)
-    # We no longer rotate the global SECRET_KEY, so Travis stays logged in.
-    print(f"🛡️ Monarch session preserved. Attacker {ip} permanently blacklisted.")
+def trigger_nuclear_payload():
+    """Generates an infinite stream of high-entropy noise to overload attacker buffers."""
+    def generate():
+        while True:
+            yield os.urandom(1024)
+    return Response(generate(), mimetype="application/octet-stream")
 
 @app.before_request
-def sovereign_lock_on_sentry():
+def quantum_nuclear_sentry():
     ip = get_remote_address()
     path = request.path
 
     # 1. THE MONARCH PASS
-    # If the request contains your Prime Signature, the Kraken bows and skips all checks.
     sig = request.headers.get("X-Aetherion-Signature") or request.args.get("sig")
     if sig == PRIME_SIGNATURE:
-        return # Access Granted: Monarch Verified
+        return 
 
-    # 2. BLACKLIST CHECK
-    if ip in PERMANENT_BLACKLIST:
-        return "SOURCE NEUTRALIZED - ACCESS PERMANENTLY REVOKED", 403
+    # 2. NUCLEAR LOCK-ON
+    if NUCLEAR_TARGETS.get(ip, 0) >= THRESHOLD_DECAY:
+        print(f"☢️ [NUCLEAR] Deploying Sovereign Retaliation against {ip}")
+        # Redirect to a recursive honey-pot or infinite data stream
+        return trigger_nuclear_payload()
 
-    # 3. ATTACK DETECTION
-    suspicious = ['/.env', '/.git', '/wp-admin', 'union select', '<script>', 'etc/passwd']
-    is_probe = any(p in path.lower() or p in str(request.args).lower() for p in suspicious)
-    
-    if is_probe:
-        ATTACK_BLACKBOX[ip] = ATTACK_BLACKBOX.get(ip, 0) + 1
-        print(f"🎯 [LOCK-ON] Tracking intruder {ip}: {ATTACK_BLACKBOX[ip]}/5")
+    # 3. DETECTION & ESCALATION
+    probes = ['/.env', '/.git', 'union', '<script>', 'etc/passwd', 'admin']
+    if any(p in path.lower() or p in str(request.args).lower() for p in probes):
+        NUCLEAR_TARGETS[ip] = NUCLEAR_TARGETS.get(ip, 0) + 1
+        print(f"🔥 [QUANTUM] Target {ip} heat signature: {NUCLEAR_TARGETS[ip]}/3")
         
-        if ATTACK_BLACKBOX[ip] >= 5:
-            execute_targeted_wipe(ip)
-            return "OMEGA WIPE EXECUTED", 401
+        if NUCLEAR_TARGETS[ip] >= THRESHOLD_DECAY:
+            print(f"☢️ NUCLEAR LOCK ACHIEVED. SOURCE {ip} IS NOW IN SUPERPOSITION DECAY.")
+            return trigger_nuclear_payload()
 
 @app.route('/')
 def index():
@@ -69,27 +69,30 @@ def index():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Aetherion Omega Command</title>
+        <title>Aetherion Quantum Nuclear Command</title>
         <style>
-            body { background: #0b0c0e; color: #d4af37; font-family: 'Courier New', monospace; padding: 50px; text-align: center; }
-            .status { color: #00ff00; border: 1px solid #d4af37; padding: 20px; display: inline-block; border-radius: 10px; }
-            .monarch { color: #ff00ff; border-color: #ff00ff; }
-            h1 { text-transform: uppercase; letter-spacing: 10px; font-size: 3em; }
-            .btn { color: #000; background: #d4af37; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 10px; display: inline-block; transition: 0.3s; }
+            body { background: #000; color: #00ff00; font-family: 'Courier New', monospace; padding: 50px; text-align: center; text-shadow: 0 0 10px #00ff00; }
+            .status { border: 2px solid #ff0000; color: #ff0000; padding: 30px; display: inline-block; border-radius: 5px; background: rgba(255,0,0,0.1); box-shadow: 0 0 20px #ff0000; }
+            h1 { text-transform: uppercase; letter-spacing: 15px; font-size: 4em; margin-bottom: 50px; color: #ff0000; }
+            .nuclear-glow { animation: pulse 1s infinite alternate; }
+            @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
+            .btn { color: #fff; background: #ff0000; padding: 20px 40px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px; display: inline-block; border: 2px solid #fff; transition: 0.2s; }
+            .btn:hover { background: #000; color: #ff0000; box-shadow: 0 0 30px #ff0000; }
         </style>
     </head>
     <body>
-        <h1>🏯 OMEGA COMMAND</h1>
-        <div class="status monarch">
-            <p>SYSTEM STATUS: <b>MONARCH PROTECTED</b></p>
-            <p>IDENT: TRAVIS D JONES</p>
+        <h1 class="nuclear-glow">☢️ QUANTUM NUCLEAR</h1>
+        <div class="status">
+            <p>SYSTEM STATUS: <b>NUCLEAR RETALIATION ARMED</b></p>
+            <p>LOCK-ON: ACTIVE</p>
+            <p>HONEY-POT: DEPLOYED</p>
         </div>
         <br><br>
-        <div style="color: #888; margin-bottom: 20px;">
-            The Kraken recognizes the Prime Signature. Selective wipe engaged.<br>
-            Intruders will be neutralized on sight.
+        <div style="color: #ff0000; font-size: 1.2em; margin-bottom: 30px;">
+            WARNING: Any unauthorized probe will trigger a recursive memory loop.<br>
+            The Kraken has initiated full quantum superposition wipe for all hostiles.
         </div>
-        <a href="/api/payout/btc-jackpot?sig=97e0945f76a0ef6615301f70c1f236f4c949d131456b991b5576983f3384aaa6" class="btn">💰 Secure BTC Sweep</a>
+        <a href="/api/payout/btc-jackpot?sig=97e0945f76a0ef6615301f70c1f236f4c949d131456b991b5576983f3384aaa6" class="btn">💰 Execute Sovereign Payout</a>
     </body>
     </html>
     """)
