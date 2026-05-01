@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-💰 AETHERION BTC SWEEPER v6.1 — Import Correction Edition.
-Fixed: P2WPKHAddress import and signing witness construction.
+💰 AETHERION BTC SWEEPER v7.0 — The Definitive Fix.
+Fixed: Import paths, class names (P2wpkhAddress), and full SegWit signing.
 """
 
 import os, requests, json
@@ -10,7 +10,7 @@ import os, requests, json
 def inject_bitcoin_config():
     try:
         import bitcoinutils.constants as constants
-        # Manually setting Mainnet constants for Render
+        # Manually setting Mainnet constants to bypass Render filesystem errors
         constants.NETWORK_WIF_PREFIX = b'\x80'
         constants.NETWORK_P2PKH_PREFIX = b'\x00'
         constants.NETWORK_P2SH_PREFIX = b'\x05'
@@ -20,12 +20,13 @@ def inject_bitcoin_config():
         print(f"⚠️ Config Injection Warning: {e}")
 
 def run_btc_sweep():
-    print("📡 Initializing Master BTC Sweep v6.1...")
+    print("📡 Initializing Master BTC Sweep v7.0...")
     inject_bitcoin_config()
     
-    from bitcoinutils.keys import PrivateKey
-    from bitcoinutils.address import P2WPKHAddress
+    # In v0.8.x, all key/address classes are in .keys
+    from bitcoinutils.keys import PrivateKey, P2wpkhAddress
     from bitcoinutils.transactions import Transaction, TxInput, TxOutput
+    from bitcoinutils.script import Script
     from bitcoinutils.setup import setup
     
     try: setup('mainnet')
@@ -46,7 +47,7 @@ def run_btc_sweep():
         priv = PrivateKey(secret_exponent=int(clean_key, 16))
         pub = priv.get_public_key()
         
-        # Correct address derivation for P2WPKH
+        # Correct class: P2wpkhAddress
         address_obj = pub.get_segwit_address()
         address_str = address_obj.to_string()
         print(f"🎯 Origin Address: {address_str} | Destination: {dest_addr}")
@@ -67,16 +68,18 @@ def run_btc_sweep():
             tx_inputs.append(TxInput(u['txid'], u['vout']))
             total_val += u['value']
 
-        fee = 10000 
+        # 8000 sats fee for priority
+        fee = 8000 
         out_val = total_val - fee
         tx_outputs = [TxOutput(out_val, dest_addr)]
 
+        # Create SegWit transaction
         tx = Transaction(tx_inputs, tx_outputs, has_segwit=True)
         print(f"✅ {len(tx_inputs)} Input(s) confirmed. Total: {total_val / 10**8} BTC")
 
         # 4. SIGNING
-        # Segwit signing requires the script code (p2pkh script inside p2wpkh)
-        script_code = pub.get_segwit_address().to_script_pub_key()
+        # For P2WPKH, the script_code is the P2PKH script of the pubkey hash
+        script_code = Script(['OP_DUP', 'OP_HASH160', pub.get_address().to_hash160(), 'OP_EQUALVERIFY', 'OP_CHECKSIG'])
         
         for i, u in enumerate(utxos):
             sig = priv.sign_segwit_input(tx, i, script_code, u['value'])
@@ -94,7 +97,9 @@ def run_btc_sweep():
         print("------------------------------------------")
             
     except Exception as e:
+        import traceback
         print(f"❌ Construction Error: {e}")
+        traceback.print_exc()
 
 if __name__ == "__main__":
     run_btc_sweep()
