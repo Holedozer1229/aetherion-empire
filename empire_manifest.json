@@ -1,0 +1,17 @@
+{
+    "reporter": "Travis D Jones",
+    "vaults": {
+        "ethereum_mainnet": {
+            "address": "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20",
+            "amount": 18109.0,
+            "status": "TRANSFERRED"
+        },
+        "solana_mainnet": {
+            "address": "dwZEUgvMXzobHZc1tzMrh9a55J1PCRUqrMCBubYGw8t",
+            "amount": 28838.12,
+            "status": "SWEPT"
+        }
+    },
+    "total_value_usd": "$78,537,878.35",
+    "prime_signature": "97e0945f76a0ef6615301f70c1f236f4c949d131456b991b5576983f3384aaa6"
+}
