@@ -10,16 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
       - name: Install Remix Toolset
         run: npm install -g @remix-project/remixd solc
+
       - name: Build Empire Contract
         run: |
           mkdir -p build
-          solc --bin --abi contracts/AetherionFlashHaul.sol -o build/
+          # Using the verified contract path
+          solc --bin --abi contracts/AetherionFlashHaul.sol -o build/ || echo "Warning: contracts folder not found, checking root"
+          if [ ! -d "build" ] || [ -z "$(ls -A build)" ]; then
+            solc --bin --abi AetherionFlashHaul_Final.sol -o build/
+          fi
+
       - name: Archive Artifacts
         uses: actions/upload-artifact@v4
         with:
