@@ -7,4 +7,4 @@ solders
 base58
 cryptography
 eth-abi
-bitcoin-utils
+web3
