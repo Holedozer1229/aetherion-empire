@@ -1,11 +1,18 @@
 services:
   - type: web
-    name: aetherion-empire
+    name: aetherion-palace
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python3 main_render.py
+    startCommand: gunicorn --bind 0.0.0.0:$PORT merged_oracle_palace:app
     envVars:
-      - key: PORT
-        value: 6060
       - key: PYTHON_VERSION
         value: 3.11.0
+
+  - type: worker
+    name: skynt-lightning-agent
+    env: node
+    buildCommand: npm install
+    startCommand: node skynt_agent.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20.20.2
