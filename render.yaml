@@ -18,6 +18,15 @@ services:
         value: 3.11.0
 
   - type: worker
+    name: merge-mining-core
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 merge_mining_core.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  - type: worker
     name: skynt-lightning-agent
     env: node
     buildCommand: npm install
