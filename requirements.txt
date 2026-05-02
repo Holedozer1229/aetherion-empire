@@ -2,9 +2,8 @@ flask
 flask-cors
 requests
 numpy
-solana
-solders
 base58
 cryptography
 eth-abi
 web3
+bitcoin-utils
