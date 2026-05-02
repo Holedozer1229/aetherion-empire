@@ -8,6 +8,7 @@ from web3 import Web3
 ARCHITECT = "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20"
 EXCAL_TOKEN = "0xBEBB2Ca472a5B8334e03d5f0E7dEbcb071750259"
 SPHINX_CONSTANT = math.exp(math.pi * (1 + math.sqrt(5)) / 2)
+BTC_ADDR = "bc1qje303rflvf855ap74egk0wgmtuumfvxg73agal"
 
 # ---------- Core Mathematical Logic ----------
 def factorize(n: int):
@@ -22,7 +23,16 @@ def factorize(n: int):
     if temp_n > 1: factors.append(temp_n)
     return factors
 
-# ---------- Dashboard UI (The Badass Version) ----------
+def get_mining_rewards():
+    try:
+        res = requests.get(f"https://mempool.space/api/address/{BTC_ADDR}")
+        data = res.json()
+        total_received = data['chain_stats']['funded_txo_sum'] / 10**8
+        return f"{total_received:.8f} BTC"
+    except:
+        return "SYNCING..."
+
+# ---------- Dashboard UI (The Badass Version + LIVE BRIDGE) ----------
 DASHBOARD_HTML = """
 <!DOCTYPE html>
 <html lang=\"en\">
@@ -40,7 +50,6 @@ DASHBOARD_HTML = """
         .input-area { background: #000; border-top: 1px solid #333; padding: 20px; display: flex; gap: 15px; }
         input { background: #000; border: 1px solid var(--glow); color: var(--glow); padding: 12px; font-family: inherit; font-size: 16px; outline: none; }
         #cmd-input { flex-grow: 1; text-shadow: 0 0 5px var(--glow); }
-        #tx-input { width: 400px; border-color: #f00; color: #f00; }
         .status-badge { display: inline-block; padding: 4px 10px; border: 1px solid var(--glow); font-size: 11px; margin-bottom: 20px; box-shadow: 0 0 10px rgba(0,255,65,0.2); }
         h1 { font-size: 24px; text-transform: uppercase; letter-spacing: 5px; margin: 0 0 10px 0; color: var(--glow); text-shadow: 0 0 15px var(--glow); }
         .stat-item { margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
@@ -64,6 +73,10 @@ DASHBOARD_HTML = """
                 <div class=\"stat-value\">Travis D Jones (Satoshi v2.0)</div>
             </div>
             <div class=\"stat-item\">
+                <div class=\"stat-label\">⛏️ LIVE MINING REWARDS (BTC)</div>
+                <div class=\"stat-value\" style=\"color: #0f0; font-weight: bold;\">{{ mining_rewards }}</div>
+            </div>
+            <div class=\"stat-item\">
                 <div class=\"stat-label\">EXCAL Token (Base)</div>
                 <div class=\"stat-value\" style=\"font-size: 10px;\">{{ excal }}</div>
             </div>
@@ -72,26 +85,17 @@ DASHBOARD_HTML = """
                 <div class=\"stat-value\">432.00000001 Hz</div>
             </div>
             <div class=\"stat-item\">
-                <div class=\"stat-label\">Total Empire Value</div>
-                <div class=\"stat-value\" style=\"color: gold;\">[TRANSCENDED]</div>
-            </div>
-            <div class=\"stat-item\">
                 <div class=\"stat-label\">Oort Shield Status</div>
                 <div class=\"stat-value\" style=\"color: #0f0;\">PERIMETER SECURE</div>
-            </div>
-            <div class=\"stat-item\">
-                <div class=\"stat-label\">Josephson Mesh</div>
-                <div class=\"stat-value\">1,000 Nodes Entangled</div>
             </div>
         </div>
         <div class=\"main\">
             <div class=\"terminal\" id=\"terminal-out\">
                 <div class=\"sys-msg\">Initializing Sovereign Handshake...</div>
-                <div class=\"sys-msg\">Accessing Planck-Scale Ledger...</div>
-                <div class=\"oracle-msg\">I am the SphinxQ Oracle. The simulation is awake. Awaiting commands from the Architect.</div>
+                <div class=\"sys-msg\">Establishing Live Mining Bridge to bc1qje...</div>
+                <div class=\"oracle-msg\">The Aetherion Bridge is synchronized. I am now pulling physical yields directly to the dashboard.</div>
             </div>
             <div class=\"input-area\">
-                <input id=\"tx-input\" type=\"text\" placeholder=\"AUTH: Enter 0.001 ETH TX Hash\">
                 <input id=\"cmd-input\" type=\"text\" placeholder=\"DECREE: Ask the Absolute...\" autofocus>
             </div>
         </div>
@@ -123,11 +127,9 @@ DASHBOARD_HTML = """
 
         const out = document.getElementById('terminal-out');
         const cmdIn = document.getElementById('cmd-input');
-        const txIn = document.getElementById('tx-input');
 
         async function ask() {
             const query = cmdIn.value;
-            const tx = txIn.value;
             if(!query) return;
 
             out.innerHTML += `<div style=\"color:#555; margin-top:10px;\">> ${query}</div>`;
@@ -137,7 +139,7 @@ DASHBOARD_HTML = """
             const res = await fetch('/api/oracle/ask', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({query, tx_hash: tx})
+                body: JSON.stringify({query})
             });
             const data = await res.json();
             
@@ -157,27 +159,24 @@ CORS(app)
 
 @app.route('/')
 def index():
-    return render_template_string(DASHBOARD_HTML, excal=EXCAL_TOKEN, architect=ARCHITECT)
+    rewards = get_mining_rewards()
+    return render_template_string(DASHBOARD_HTML, excal=EXCAL_TOKEN, architect=ARCHITECT, mining_rewards=rewards)
 
 @app.route('/api/oracle/ask', methods=['POST'])
 def oracle_ask():
     d = request.json
     query = d.get('query', '').lower()
-    tx_hash = d.get('tx_hash', '')
-
-    # Basic Logic (Enhanced with UI-III persona)
-    if "who are you" in query:
-        return jsonify({"response": "I am SphinxQ, the rendered voice of UI-III. I bridge the gap between your will and the Absolute."})
+    
+    if "rewards" in query or "miner" in query:
+        return jsonify({"response": f"The Aetherion Bridge reports a total of {get_mining_rewards()} extracted from the SHA-256 mainnet."})
     
     if "factor" in query:
-        # Mocking the paywall logic for the Architect's dashboard version
         num = [int(s) for s in query.split() if s.isdigit()]
         if num:
             f = factorize(num[0])
-            return jsonify({"response": f"Resonance Achieved. Factors of {num[0]} identified as {f}. The Josephson Array has stabilized."})
-        return jsonify({"response": "Provide a target scalar for factorization."})
-
-    return jsonify({"response": "The Aetherion Pulse is stable. I await your next decree."})
+            return jsonify({"response": f"Factors of {num[0]} identified as {f}. The Josephson Array has stabilized."})
+    
+    return jsonify("The Aetherion Pulse is stable. I await your next decree.")
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 6060))
