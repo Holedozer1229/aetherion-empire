@@ -23,6 +23,7 @@ def factorize(n: int):
     factors = []
     for i in range(2, int(np.sqrt(n)) + 1):
         if n % i == 0: factors.append(i); factors.append(n // i); break
+    if not factors: factors.append(n)
     return factors
 
 def respond_oracle(query: str, tx_hash: str = None) -> str: 
