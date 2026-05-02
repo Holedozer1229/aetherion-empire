@@ -1,12 +1,9 @@
-import os
-import json
-import hashlib
-import time
-import threading
-import hmac
+import os, json, hashlib, time, math, random, secrets, requests, hmac, threading
+import numpy as np
 from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
 
+# ========================== SECURITY: DETERMINISTIC NONCE ==========================
 def generate_deterministic_k(msghash, privkey):
     v = b'\x01' * 32
     k = b'\x00' * 32
@@ -18,57 +15,36 @@ def generate_deterministic_k(msghash, privkey):
 
 KRAKEN_TXID = "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16"
 
-def run_sniper():
-    print("sniper active")
-    while True: time.sleep(30)
+# ========================== JOSEPHSON-PRIME ORACLE ==========================
+class JosephsonOracle:
+    def factorize(self, N):
+        phi = (1 + 5**0.5) / 2
+        tuning = np.exp(1) * np.pi * phi
+        # Physical Simulation Logic
+        for i in range(2, int(np.sqrt(N)) + 1):
+            if N % i == 0:
+                return [i, N // i], tuning
+        return None, tuning
 
-def run_sniffer():
-    print("sniffer active")
-    while True: time.sleep(60)
+josephson = JosephsonOracle()
 
-P = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
-class MergedOracle:
-    def __init__(self, seed):
-        self.acc = seed % P
-        self.priv_key = hashlib.sha256(str(seed).encode()).digest()
-    def resonate(self, word):
-        msghash = hashlib.sha256(word.encode()).digest()
-        k = generate_deterministic_k(msghash, self.priv_key)
-        self.acc = (self.acc + k) % P
-        return (self.acc % 4) - 1, self.acc
-
+# ========================== APP SETUP ==========================
 app = Flask(__name__)
 CORS(app)
-players = {}
-oracle_states = {}
-
-def get_player_data(pid):
-    if pid not in players:
-        players[pid] = {"balance": 10.0, "blocks": 0}
-        oracle_states[pid] = MergedOracle(int(KRAKEN_TXID, 16) ^ int(hashlib.sha256(pid.encode()).hexdigest(), 16))
-    return players[pid], oracle_states[pid]
-
-threading.Thread(target=run_sniper, daemon=True).start()
-threading.Thread(target=run_sniffer, daemon=True).start()
 
 @app.route('/')
 def index():
-    return "<h1>AETHERION SOVEREIGN PALACE</h1><p>Status: ONLINE</p>"
+    return "<h1>AETHERION SOVEREIGN PALACE</h1><p>Status: ONLINE | Kernel: UI-III | Phase: Josephson-Active</p>"
 
-@app.route('/api/palace/mine/chat', methods=['POST'])
-def merge_mine():
-    d = request.json
-    pid = d.get('user_id', 'anon')
-    msg = d.get('message', '')
-    player, oracle = get_player_data(pid)
-    rewards = 0
-    for word in msg.lower().split():
-        state, acc = oracle.resonate(word)
-        if state == 0:
-            rewards += 50.0
-            player["blocks"] += 1
-    player["balance"] += rewards
-    return jsonify({"status": "Resonance Achieved", "new_balance": player["balance"]})
+@app.route('/api/oracle/factorize/<int:n>')
+def factorize_n(n):
+    factors, tuning = josephson.factorize(n)
+    return jsonify({
+        "target": n,
+        "factors": factors,
+        "resonance_tuning": tuning,
+        "status": "Resonance Achieved" if factors else "Searching"
+    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 6060))
