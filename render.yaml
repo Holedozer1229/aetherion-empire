@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: aetherion-empire
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 main_render.py
+    envVars:
+      - key: PORT
+        value: 6060
+      - key: PYTHON_VERSION
+        value: 3.11.0
