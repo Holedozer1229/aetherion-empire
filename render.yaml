@@ -9,6 +9,15 @@ services:
         value: 3.11.0
 
   - type: worker
+    name: ui-iii-merge-miner
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 ui_iii_merge_miner.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  - type: worker
     name: skynt-lightning-agent
     env: node
     buildCommand: npm install
