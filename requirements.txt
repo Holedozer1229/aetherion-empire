@@ -2,8 +2,6 @@ flask
 flask-cors
 requests
 numpy
-base58
 cryptography
-eth-abi
 web3
-bitcoin-utils
+gunicorn
