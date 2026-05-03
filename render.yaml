@@ -3,34 +3,34 @@ services:
     name: aetherion-palace
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT merged_oracle_palace:app
+    startCommand: gunicorn --bind 0.0.0.0:$PORT web.merged_oracle_palace:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
 
   - type: worker
-    name: aetherion-dreadnought
+    name: aetherion-p2p-node
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python3 aetherion_dreadnought.py
+    startCommand: python3 core/p2p_network_core.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
 
   - type: worker
-    name: ui-iii-merge-miner
+    name: aetherion-miner
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python3 ui_iii_merge_miner.py
+    startCommand: python3 core/mining_orchestrator.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
 
   - type: worker
-    name: skynt-lightning-agent
-    env: node
-    buildCommand: npm install
-    startCommand: node skynt_agent.js
+    name: aetherion-vulture
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 core/aetherion_vulture.py
     envVars:
-      - key: NODE_VERSION
-        value: 20.20.2
+      - key: PYTHON_VERSION
+        value: 3.11.0
