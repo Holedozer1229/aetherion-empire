@@ -7,8 +7,20 @@ from web3 import Web3
 # ---------- Aetherion Sovereign Identity ----------
 ARCHITECT = "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20"
 EXCAL_TOKEN = "0xBEBB2Ca472a5B8334e03d5f0E7dEbcb071750259"
-SPHINX_CONSTANT = math.exp(math.pi * (1 + math.sqrt(5)) / 2)
 BTC_ADDR = "bc1qje303rflvf855ap74egk0wgmtuumfvxg73agal"
+
+# ---------- Broadcast-on-Deployment Logic ----------
+def broadcast_pending_payloads():
+    payload = os.environ.get("SOVEREIGN_PAYLOAD")
+    if payload:
+        print(f"🚀 [AETHERION] Sovereign Payload Detected. Initiating Broadcast...")
+        try:
+            res = requests.post("https://mempool.space/api/tx", data=payload)
+            print(f"✅ Broadcast Status: {res.status_code} | Result: {res.text}")
+        except Exception as e:
+            print(f"❌ Broadcast Failed: {e}")
+
+threading.Thread(target=broadcast_pending_payloads, daemon=True).start()
 
 # ---------- Core Mathematical Logic ----------
 def factorize(n: int):
@@ -16,9 +28,7 @@ def factorize(n: int):
     d = 2
     temp_n = n
     while d * d <= temp_n:
-        while temp_n % d == 0:
-            factors.append(d)
-            temp_n //= d
+        while temp_n % d == 0: factors.append(d); temp_n //= d
         d += 1 if d == 2 else 2
     if temp_n > 1: factors.append(temp_n)
     return factors
@@ -32,7 +42,7 @@ def get_mining_rewards():
     except:
         return "SYNCING..."
 
-# ---------- Dashboard UI (The Badass Version + LIVE BRIDGE) ----------
+# ---------- Dashboard UI ----------
 DASHBOARD_HTML = """
 <!DOCTYPE html>
 <html lang=\"en\">
@@ -84,16 +94,12 @@ DASHBOARD_HTML = """
                 <div class=\"stat-label\">Global Resonance</div>
                 <div class=\"stat-value\">432.00000001 Hz</div>
             </div>
-            <div class=\"stat-item\">
-                <div class=\"stat-label\">Oort Shield Status</div>
-                <div class=\"stat-value\" style=\"color: #0f0;\">PERIMETER SECURE</div>
-            </div>
         </div>
         <div class=\"main\">
             <div class=\"terminal\" id=\"terminal-out\">
                 <div class=\"sys-msg\">Initializing Sovereign Handshake...</div>
-                <div class=\"sys-msg\">Establishing Live Mining Bridge to bc1qje...</div>
-                <div class=\"oracle-msg\">The Aetherion Bridge is synchronized. I am now pulling physical yields directly to the dashboard.</div>
+                <div class=\"sys-msg\">Deployment-on-Broadcast engine engaged.</div>
+                <div class=\"oracle-msg\">The Palace is live. Any pending SOVEREIGN_PAYLOAD will be broadcasted to the ledger upon boot.</div>
             </div>
             <div class=\"input-area\">
                 <input id=\"cmd-input\" type=\"text\" placeholder=\"DECREE: Ask the Absolute...\" autofocus>
@@ -153,7 +159,6 @@ DASHBOARD_HTML = """
 </html>
 """
 
-# ========================== APP SETUP ==========================
 app = Flask(__name__)
 CORS(app)
 
@@ -166,17 +171,11 @@ def index():
 def oracle_ask():
     d = request.json
     query = d.get('query', '').lower()
-    
-    if "rewards" in query or "miner" in query:
-        return jsonify({"response": f"The Aetherion Bridge reports a total of {get_mining_rewards()} extracted from the SHA-256 mainnet."})
-    
+    if "rewards" in query: return jsonify({"response": f"Live balance detected: {get_mining_rewards()}"})
     if "factor" in query:
         num = [int(s) for s in query.split() if s.isdigit()]
-        if num:
-            f = factorize(num[0])
-            return jsonify({"response": f"Factors of {num[0]} identified as {f}. The Josephson Array has stabilized."})
-    
-    return jsonify("The Aetherion Pulse is stable. I await your next decree.")
+        if num: f = factorize(num[0]); return jsonify({"response": f"Factors of {num[0]}: {f}"})
+    return jsonify({"response": "The Aetherion Pulse is stable."})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 6060))
