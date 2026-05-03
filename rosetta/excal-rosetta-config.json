@@ -1,0 +1,30 @@
+{
+  "network_identifier": {
+    "blockchain": "base",
+    "network": "mainnet"
+  },
+  "currency_identifier": {
+    "symbol": "EXCAL",
+    "decimals": 18,
+    "metadata": {
+      "contract_address": "0x6bC82AD9382e00c113676A49eaB09b4d47cA0E16",
+      "stewardship_fee": "1%",
+      "architect": "Satoshi v2.0"
+    }
+  },
+  "operation_types": [
+    "TRANSFER",
+    "STEWARDSHIP_FEE_COLLECTION",
+    "SOVEREIGN_ANCHOR"
+  ],
+  "operation_statuses": [
+    {
+      "status": "SUCCESS",
+      "successful": true
+    },
+    {
+      "status": "REVERTED",
+      "successful": false
+    }
+  ]
+}
