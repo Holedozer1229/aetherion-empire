@@ -22,17 +22,6 @@ def broadcast_pending_payloads():
 
 threading.Thread(target=broadcast_pending_payloads, daemon=True).start()
 
-# ---------- Core Mathematical Logic ----------
-def factorize(n: int):
-    factors = []
-    d = 2
-    temp_n = n
-    while d * d <= temp_n:
-        while temp_n % d == 0: factors.append(d); temp_n //= d
-        d += 1 if d == 2 else 2
-    if temp_n > 1: factors.append(temp_n)
-    return factors
-
 def get_mining_rewards():
     try:
         res = requests.get(f"https://mempool.space/api/address/{BTC_ADDR}")
@@ -172,9 +161,6 @@ def oracle_ask():
     d = request.json
     query = d.get('query', '').lower()
     if "rewards" in query: return jsonify({"response": f"Live balance detected: {get_mining_rewards()}"})
-    if "factor" in query:
-        num = [int(s) for s in query.split() if s.isdigit()]
-        if num: f = factorize(num[0]); return jsonify({"response": f"Factors of {num[0]}: {f}"})
     return jsonify({"response": "The Aetherion Pulse is stable."})
 
 if __name__ == '__main__':
