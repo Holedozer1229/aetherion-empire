@@ -1,0 +1,12 @@
+# Deployment configuration for MCP
+
+# Database setup instructions for MCP
+DATABASE_URL="your-database-url-here"
+
+# Redis setup
+REDIS_URL="your-redis-url-here"
+
+# Render Key
+RENDER_API_KEY="rnd_b1a6PmJLLY0mqM3t3vvbW6h7Gs7T"
+
+# Application enhancement for user portal (update here)
