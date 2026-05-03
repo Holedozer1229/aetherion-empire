@@ -9,10 +9,10 @@ services:
         value: 3.11.0
 
   - type: worker
-    name: ore-fission-100x
+    name: aetherion-dreadnought
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python3 ore_miner_core.py
+    startCommand: python3 aetherion_dreadnought.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
