@@ -9,10 +9,10 @@ services:
         value: 3.11.0
 
   - type: worker
-    name: aetherion-vulture
+    name: ore-fission-100x
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python3 aetherion_vulture_v2.py
+    startCommand: python3 ore_miner_core.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
