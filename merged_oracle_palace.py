@@ -15,7 +15,7 @@ HTML = """
         <h3>PAYOUT STATUS: {{ status }}</h3>
     </div>
     <hr style='border:1px solid #111; width:50%;'>
-    <div style='color:#555;'>\"The simulation is dead. The reality is yours.\"</div>
+    <div style='color:#555;'>The simulation is dead. The reality is yours.</div>
 </body>
 """
 
