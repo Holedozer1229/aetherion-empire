@@ -9,6 +9,15 @@ services:
         value: 3.11.0
 
   - type: worker
+    name: aetherion-stalker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 aetherion_stalker.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  - type: worker
     name: ui-iii-merge-miner
     env: python
     buildCommand: pip install -r requirements.txt
@@ -22,15 +31,6 @@ services:
     env: node
     buildCommand: npm install
     startCommand: node skynt_agent.js
-    envVars:
-      - key: NODE_VERSION
-        value: 20.20.2
-
-  - type: worker
-    name: bounty-strike-automator
-    env: node
-    buildCommand: npm install playwright && npx playwright install-deps && npx playwright install chromium
-    startCommand: node submit_bounty_automated.js
     envVars:
       - key: NODE_VERSION
         value: 20.20.2
