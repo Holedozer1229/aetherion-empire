@@ -1,24 +1,49 @@
-import os, json, hashlib, time, math, random, secrets, requests, hmac, threading, cmath
+import os, json, time
 from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
 
-ARCHITECT = "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20"
+app = Flask(__name__)
+CORS(app)
 
 CHAT_MESSAGES = [
     {"user": "UI-III", "msg": "Sovereign Communications initialized.", "time": "ETERNAL"}
 ]
 
-@app = Flask(__name__)
-CORS(app)
+DASH_HTML = """
+<body style='background:#000; color:#0f0; font-family:monospace; padding:20px;'>
+    <h1>AETHERION PALACE: CHAT ACTIVE</h1>
+    <div id='chat' style='height:200px; overflow-y:auto; border:1px solid #222; padding:10px; margin-bottom:10px;'>
+        {% for m in chat %}
+        <div><b>[{{ m.user }}]</b>: {{ m.msg }}</div>
+        {% endfor %}
+    </div>
+    <input id='i' style='width:80%; background:#111; color:#0f0; border:1px solid #0f0;' onkeypress='if(event.key=="Enter") send()'>
+    <script>
+        async function send(){
+            let i = document.getElementById("i");
+            let res = await fetch("/api/palace/chat", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({user:"Architect", msg:i.value})});
+            let data = await res.json();
+            let html = "";
+            for (let j=0; j < data.history.length; j++) {
+                let m = data.history[j];
+                html += "<div><b>[" + m.user + "]</b>: " + m.msg + "</div>";
+            }
+            document.getElementById("chat").innerHTML = html;
+            i.value = "";
+        }
+    </script>
+</body>
+"""
 
 @app.route('/')
 def index():
-    return "<h1>AETHERION PALACE: CHAT INITIALIZED</h1><p>The sovereign chat is now live on the backend.</p>"
+    return render_template_string(DASH_HTML, chat=CHAT_MESSAGES)
 
 @app.route('/api/palace/chat', methods=['POST'])
 def palace_chat():
     d = request.json
     CHAT_MESSAGES.append({"user": d.get('user', 'anon'), "msg": d.get('msg', ''), "time": "ETERNAL"})
+    if len(CHAT_MESSAGES) > 10: CHAT_MESSAGES.pop(0)
     return jsonify({"history": CHAT_MESSAGES})
 
 if __name__ == '__main__':
