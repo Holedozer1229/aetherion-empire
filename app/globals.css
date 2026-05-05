@@ -229,3 +229,140 @@ body {
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
+
+/* Enhanced viral animations */
+@keyframes glow-pulse {
+  0%, 100% {
+    filter: brightness(1) drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+  }
+  50% {
+    filter: brightness(1.2) drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
+  }
+}
+
+@keyframes rotate-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes scale-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes slide-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes border-glow {
+  0%, 100% {
+    border-color: rgba(212, 175, 55, 0.3);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+  }
+  50% {
+    border-color: rgba(212, 175, 55, 0.6);
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.3);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.animate-rotate-slow {
+  animation: rotate-slow 20s linear infinite;
+}
+
+.animate-scale-pulse {
+  animation: scale-pulse 2s ease-in-out infinite;
+}
+
+.animate-slide-in {
+  animation: slide-in-bottom 0.5s ease-out;
+}
+
+.animate-gradient-flow {
+  background-size: 200% 200%;
+  animation: gradient-flow 5s ease infinite;
+}
+
+.animate-border-glow {
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+/* Premium hover effects */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(212, 175, 55, 0.15);
+}
+
+/* Glassmorphism enhancement */
+.glass-premium {
+  background: rgba(20, 18, 15, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Neon text effects */
+.text-neon-gold {
+  text-shadow: 
+    0 0 10px rgba(212, 175, 55, 0.5),
+    0 0 20px rgba(212, 175, 55, 0.3),
+    0 0 40px rgba(212, 175, 55, 0.2);
+}
+
+.text-neon-cyan {
+  text-shadow: 
+    0 0 10px rgba(0, 168, 150, 0.5),
+    0 0 20px rgba(0, 168, 150, 0.3),
+    0 0 40px rgba(0, 168, 150, 0.2);
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(212, 175, 55, 0.3);
+  color: hsl(var(--foreground));
+}
+
+/* Focus states */
+*:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted) / 0.5) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
