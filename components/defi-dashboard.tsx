@@ -70,30 +70,59 @@ export function DeFiDashboard() {
     fetchSolBalance();
   }, [publicKey, connection]);
 
-  // Simulate quantum oracle state (would connect to Python backend)
+  // Connect to Aetherion Oracle API
   useEffect(() => {
-    const interval = setInterval(() => {
-      const phi = Math.random();
-      setQuantumState({
-        phi,
-        resonance: phi > 0.5 ? "STABLE" : "VOLATILE",
-        harmony: Math.sin(phi * Math.PI),
-        timestamp: new Date().toISOString(),
-      });
-    }, 3000);
+    async function fetchOracleState() {
+      try {
+        const res = await fetch("/api/oracle?word=heartbeat");
+        const data = await res.json();
+        if (data.success) {
+          setQuantumState({
+            phi: data.consciousness.phi_metric,
+            resonance: data.consciousness.resonance,
+            harmony: data.consciousness.harmony,
+            timestamp: data.timestamp,
+          });
+        }
+      } catch (err) {
+        // Fallback to local simulation
+        const phi = Math.random();
+        setQuantumState({
+          phi,
+          resonance: phi > 0.5 ? "STABLE" : "VOLATILE",
+          harmony: Math.sin(phi * Math.PI),
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+
+    fetchOracleState();
+    const interval = setInterval(fetchOracleState, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  const refreshStats = () => {
+  const refreshStats = async () => {
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/mining");
+      const data = await res.json();
+      if (data.success) {
+        setMiningStats({
+          hashrate: `${(data.mining.eth.hashrate.replace(" TH/s", ""))} TH/s`,
+          blocksVerified: data.mining.sol.blocks,
+          totalRewards: (data.mining.totalValueUsd / 1000000).toFixed(2) + "M",
+          networkDifficulty: "79.35T",
+        });
+      }
+    } catch (err) {
+      // Fallback to local simulation
       setMiningStats((prev) => ({
         ...prev,
         hashrate: `${(250 + Math.random() * 20).toFixed(1)} TH/s`,
         blocksVerified: prev.blocksVerified + Math.floor(Math.random() * 3),
       }));
-      setIsLoading(false);
-    }, 1000);
+    }
+    setIsLoading(false);
   };
 
   return (
