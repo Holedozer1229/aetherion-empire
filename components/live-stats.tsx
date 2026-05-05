@@ -2,59 +2,74 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Activity, TrendingUp, Users, Cpu } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { Activity, TrendingUp, Hash, Cpu } from "lucide-react";
+
+interface BitcoinStats {
+  blockHeight: number;
+  feeRateFast: number;
+  feeRateMed: number;
+  difficulty: number;
+  mempoolTxCount: number;
+}
 
 export function LiveStats() {
-  const [stats, setStats] = useState({
-    totalHashRate: 847.32,
-    activeMiners: 12847,
-    blocksToday: 23,
-    networkDifficulty: 5647.35,
-  });
+  const [stats, setStats] = useState<BitcoinStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Simulate live updates
   useEffect(() => {
-    const interval = setInterval(() => {
-      setStats((prev) => ({
-        totalHashRate: prev.totalHashRate + (Math.random() - 0.5) * 10,
-        activeMiners: prev.activeMiners + Math.floor((Math.random() - 0.5) * 50),
-        blocksToday: prev.blocksToday + (Math.random() > 0.95 ? 1 : 0),
-        networkDifficulty: prev.networkDifficulty + (Math.random() - 0.5) * 5,
-      }));
-    }, 3000);
+    let mounted = true;
 
-    return () => clearInterval(interval);
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/bitcoin");
+        const json = await res.json();
+        if (mounted && json.success) {
+          setStats({
+            blockHeight: json.block_height ?? 0,
+            feeRateFast: json.fee_rates?.fast ?? 0,
+            feeRateMed: json.fee_rates?.medium ?? 0,
+            difficulty: json.network_difficulty ?? 0,
+            mempoolTxCount: json.mempool_count ?? 0,
+          });
+          setLoading(false);
+        }
+      } catch {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const liveStats = [
     {
-      label: "Total Hash Rate",
-      value: `${stats.totalHashRate.toFixed(2)} TH/s`,
-      icon: Cpu,
-      change: "+12.4%",
-      positive: true,
+      label: "Block Height",
+      value: stats ? stats.blockHeight.toLocaleString() : "---",
+      icon: Hash,
+      sub: "Bitcoin Mainnet",
     },
     {
-      label: "Active Miners",
-      value: stats.activeMiners.toLocaleString(),
-      icon: Users,
-      change: "+847",
-      positive: true,
-    },
-    {
-      label: "Blocks Today",
-      value: stats.blocksToday.toString(),
+      label: "Fast Fee Rate",
+      value: stats ? `${stats.feeRateFast} sat/vB` : "---",
       icon: Activity,
-      change: "Avg: 21/day",
-      positive: true,
+      sub: "~10 min confirm",
+    },
+    {
+      label: "Mempool Txns",
+      value: stats ? stats.mempoolTxCount.toLocaleString() : "---",
+      icon: Cpu,
+      sub: "Pending",
     },
     {
       label: "Network Difficulty",
-      value: stats.networkDifficulty.toFixed(2),
+      value: stats ? (stats.difficulty / 1e12).toFixed(2) + " T" : "---",
       icon: TrendingUp,
-      change: "+2.3%",
-      positive: true,
+      sub: "Proof-of-Work",
     },
   ];
 
@@ -63,7 +78,12 @@ export function LiveStats() {
       <div className="container mx-auto px-4">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-          <span className="text-sm text-muted-foreground">Live Network Stats</span>
+          <span className="text-sm text-muted-foreground">
+            Live Bitcoin Mainnet Stats
+          </span>
+          {loading && (
+            <span className="text-xs text-muted-foreground">(loading...)</span>
+          )}
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {liveStats.map((stat, i) => (
@@ -79,10 +99,8 @@ export function LiveStats() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground truncate">{stat.label}</p>
-                <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                <p className={`text-xs ${stat.positive ? "text-secondary" : "text-red-500"}`}>
-                  {stat.change}
-                </p>
+                <p className="text-lg font-bold text-foreground font-mono">{stat.value}</p>
+                <p className="text-xs text-muted-foreground">{stat.sub}</p>
               </div>
             </motion.div>
           ))}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Bitcoin,
@@ -14,10 +15,29 @@ import {
 import { formatCurrency, formatCrypto } from "@/lib/utils";
 
 export function MiningDashboard() {
+  const [btcPrice, setBtcPrice] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const res = await fetch("/api/bitcoin");
+        const json = await res.json();
+        if (json.success && json.btc_price_usd) {
+          setBtcPrice(json.btc_price_usd);
+        }
+      } catch {}
+    };
+    fetchPrice();
+    const interval = setInterval(fetchPrice, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const TOTAL_MINED = 60.0;
+  const liveBtcPrice = btcPrice ?? 0;
   const miningData = {
-    totalMined: 60.0,
-    btcPrice: 382105.57,
-    totalValue: 22929934.2,
+    totalMined: TOTAL_MINED,
+    btcPrice: liveBtcPrice,
+    totalValue: TOTAL_MINED * liveBtcPrice,
     firstBlock: "2009-01-15 04:24:17 UTC",
     lastBlock: "2013-12-12 18:45:32 UTC",
     totalBlocks: 3642,
