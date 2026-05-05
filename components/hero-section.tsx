@@ -89,6 +89,7 @@ export function HeroSection() {
                   height={600}
                   className="w-full h-auto"
                   priority
+                  unoptimized
                 />
               </div>
 

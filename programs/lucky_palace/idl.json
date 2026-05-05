@@ -1,0 +1,156 @@
+{
+  "version": "0.1.0",
+  "name": "lucky_palace_protocol",
+  "instructions": [
+    {
+      "name": "initializeVault",
+      "accounts": [
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "vaultBump", "type": "u8" }
+      ]
+    },
+    {
+      "name": "deposit",
+      "accounts": [
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "depositor", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "accounts": [
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "recipient", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" }
+      ]
+    },
+    {
+      "name": "executeMevCapture",
+      "accounts": [
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "targetAccount", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "jitoTip", "type": "u64" },
+        { "name": "expectedProfit", "type": "u64" }
+      ]
+    },
+    {
+      "name": "registerQuantumOracle",
+      "accounts": [
+        { "name": "oracle", "isMut": true, "isSigner": false },
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "oracleId", "type": "string" },
+        { "name": "phiThreshold", "type": "u64" }
+      ]
+    },
+    {
+      "name": "verifyZkProof",
+      "accounts": [
+        { "name": "proofAccount", "isMut": true, "isSigner": false },
+        { "name": "verifier", "isMut": false, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "proofData", "type": "bytes" },
+        { "name": "publicInputs", "type": "bytes" }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Vault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "authority", "type": "publicKey" },
+          { "name": "totalDeposits", "type": "u64" },
+          { "name": "totalWithdrawals", "type": "u64" },
+          { "name": "mevCaptured", "type": "u64" },
+          { "name": "bump", "type": "u8" },
+          { "name": "createdAt", "type": "i64" }
+        ]
+      }
+    },
+    {
+      "name": "QuantumOracle",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "authority", "type": "publicKey" },
+          { "name": "oracleId", "type": "string" },
+          { "name": "phiMetric", "type": "u64" },
+          { "name": "resonanceState", "type": "u8" },
+          { "name": "harmonyFactor", "type": "u64" },
+          { "name": "lastUpdate", "type": "i64" }
+        ]
+      }
+    },
+    {
+      "name": "ZkProofRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "verifier", "type": "publicKey" },
+          { "name": "proofHash", "type": { "array": ["u8", 32] } },
+          { "name": "verified", "type": "bool" },
+          { "name": "timestamp", "type": "i64" }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "DepositEvent",
+      "fields": [
+        { "name": "depositor", "type": "publicKey", "index": true },
+        { "name": "amount", "type": "u64", "index": false },
+        { "name": "timestamp", "type": "i64", "index": false }
+      ]
+    },
+    {
+      "name": "MevCaptureEvent",
+      "fields": [
+        { "name": "vault", "type": "publicKey", "index": true },
+        { "name": "profit", "type": "u64", "index": false },
+        { "name": "jitoTip", "type": "u64", "index": false },
+        { "name": "slot", "type": "u64", "index": false }
+      ]
+    },
+    {
+      "name": "OracleUpdateEvent",
+      "fields": [
+        { "name": "oracleId", "type": "string", "index": true },
+        { "name": "phiMetric", "type": "u64", "index": false },
+        { "name": "resonance", "type": "u8", "index": false }
+      ]
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "InsufficientFunds", "msg": "Insufficient funds in vault" },
+    { "code": 6001, "name": "Unauthorized", "msg": "Unauthorized access" },
+    { "code": 6002, "name": "InvalidProof", "msg": "ZK proof verification failed" },
+    { "code": 6003, "name": "OracleNotActive", "msg": "Oracle is not in active state" },
+    { "code": 6004, "name": "MevCaptureFailed", "msg": "MEV capture execution failed" }
+  ],
+  "metadata": {
+    "address": "LPALqKz8JbGqWMhPjNnVqVwdJcuBqVMfXCvFk9KPALC"
+  }
+}

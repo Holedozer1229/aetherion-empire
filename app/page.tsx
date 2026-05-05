@@ -1,6 +1,7 @@
 import { Header } from "@/components/header";
 import { HeroSection } from "@/components/hero-section";
 import { LiveStats } from "@/components/live-stats";
+import { DeFiDashboard } from "@/components/defi-dashboard";
 import { MiningDashboard } from "@/components/mining-dashboard";
 import { AuditReport } from "@/components/audit-report";
 import { PayoutManifest } from "@/components/payout-manifest";
@@ -13,6 +14,7 @@ export default function LuckyPalacePage() {
       <Header />
       <HeroSection />
       <LiveStats />
+      <DeFiDashboard />
       <MiningDashboard />
       <FeaturesSection />
       <AuditReport />

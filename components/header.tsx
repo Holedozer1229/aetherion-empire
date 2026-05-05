@@ -1,17 +1,21 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { Crown, Shield, Wallet, Menu, X } from "lucide-react";
+import { Crown, Shield, Menu, X, Zap } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { connected: solanaConnected } = useWallet();
 
   const navLinks = [
     { href: "#dashboard", label: "Dashboard" },
     { href: "#mining", label: "Mining" },
+    { href: "#defi", label: "DeFi" },
     { href: "#audit", label: "Audit" },
     { href: "#payouts", label: "Payouts" },
   ];
@@ -49,16 +53,103 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Action Buttons */}
-          <div className="hidden md:flex items-center gap-4">
-            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/10 transition-all">
-              <Shield className="w-4 h-4" />
-              <span>Verify</span>
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all gold-glow">
-              <Wallet className="w-4 h-4" />
-              <span>Connect Wallet</span>
-            </button>
+          {/* Wallet Connect Buttons */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* Aetherion Oracle Status */}
+            <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-accent border border-accent/30 rounded-lg bg-accent/5">
+              <Zap className="w-3 h-3" />
+              <span>Oracle: ACTIVE</span>
+            </div>
+            
+            {/* Solana Wallet */}
+            <div className="solana-wallet-button">
+              <WalletMultiButton />
+            </div>
+            
+            {/* EVM Wallet (Rainbow) */}
+            <ConnectButton.Custom>
+              {({
+                account,
+                chain,
+                openAccountModal,
+                openChainModal,
+                openConnectModal,
+                mounted,
+              }) => {
+                const ready = mounted;
+                const connected = ready && account && chain;
+
+                return (
+                  <div
+                    {...(!ready && {
+                      "aria-hidden": true,
+                      style: {
+                        opacity: 0,
+                        pointerEvents: "none",
+                        userSelect: "none",
+                      },
+                    })}
+                  >
+                    {(() => {
+                      if (!connected) {
+                        return (
+                          <button
+                            onClick={openConnectModal}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all gold-glow"
+                          >
+                            <Shield className="w-4 h-4" />
+                            <span>Connect EVM</span>
+                          </button>
+                        );
+                      }
+
+                      if (chain.unsupported) {
+                        return (
+                          <button
+                            onClick={openChainModal}
+                            className="px-4 py-2 text-sm font-medium bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg"
+                          >
+                            Wrong network
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={openChainModal}
+                            className="flex items-center gap-2 px-3 py-2 text-sm font-medium border border-primary/30 rounded-lg hover:bg-primary/10 transition-all"
+                          >
+                            {chain.hasIcon && (
+                              <div
+                                className="w-4 h-4 rounded-full overflow-hidden"
+                                style={{ background: chain.iconBackground }}
+                              >
+                                {chain.iconUrl && (
+                                  <img
+                                    alt={chain.name ?? "Chain"}
+                                    src={chain.iconUrl}
+                                    className="w-4 h-4"
+                                  />
+                                )}
+                              </div>
+                            )}
+                            <span className="text-primary">{chain.name}</span>
+                          </button>
+
+                          <button
+                            onClick={openAccountModal}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all"
+                          >
+                            {account.displayName}
+                          </button>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                );
+              }}
+            </ConnectButton.Custom>
           </div>
 
           {/* Mobile Menu Button */}
@@ -74,7 +165,7 @@ export function Header() {
         <div
           className={cn(
             "md:hidden overflow-hidden transition-all duration-300",
-            isMenuOpen ? "max-h-96 pb-4" : "max-h-0"
+            isMenuOpen ? "max-h-[500px] pb-4" : "max-h-0"
           )}
         >
           <nav className="flex flex-col gap-2">
@@ -89,14 +180,12 @@ export function Header() {
               </Link>
             ))}
             <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-primary/20">
-              <button className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-primary border border-primary/30 rounded-lg">
-                <Shield className="w-4 h-4" />
-                <span>Verify</span>
-              </button>
-              <button className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg">
-                <Wallet className="w-4 h-4" />
-                <span>Connect Wallet</span>
-              </button>
+              <div className="solana-wallet-button px-4">
+                <WalletMultiButton />
+              </div>
+              <div className="px-4">
+                <ConnectButton />
+              </div>
             </div>
           </nav>
         </div>
