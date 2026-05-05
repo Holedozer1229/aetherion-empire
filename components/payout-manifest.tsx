@@ -40,11 +40,12 @@ const profitData = [
 
 export function PayoutManifest() {
   const [copied, setCopied] = useState(false);
+  const [bgError, setBgError] = useState(false);
 
   const payoutData = {
     recipient: "TRAVIS D JONES",
-    wallet: "0xTDJ7...9F8a2c4B",
-    fullWallet: "0xTDJ7a8c9E2f1B3d4A5F6C7E8D9F8a2c4B",
+    wallet: "0xC5a4...C8cb20",
+    fullWallet: "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20",
     network: "ETHEREUM",
     totalPayout: 11161500.0,
     blocksVerified: 353,
@@ -66,15 +67,18 @@ export function PayoutManifest() {
   return (
     <section id="payouts" className="py-16 md:py-24 relative">
       {/* Background Image */}
-      <div className="absolute inset-0 overflow-hidden opacity-10">
-        <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_0239-RxRokjwNBe98qbs9fCU9cDeIcrJ2pC.png"
-          alt="Background"
-          fill
-          className="object-cover"
-          unoptimized
-        />
-      </div>
+      {!bgError && (
+        <div className="absolute inset-0 overflow-hidden opacity-10">
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_0239-RxRokjwNBe98qbs9fCU9cDeIcrJ2pC.png"
+            alt=""
+            fill
+            className="object-cover"
+            unoptimized
+            onError={() => setBgError(true)}
+          />
+        </div>
+      )}
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div

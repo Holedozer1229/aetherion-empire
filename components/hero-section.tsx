@@ -3,8 +3,11 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Zap, Shield } from "lucide-react";
+import { useState } from "react";
 
 export function HeroSection() {
+  const [imgError, setImgError] = useState(false);
+  
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden cyber-grid">
       {/* Background Effects */}
@@ -82,15 +85,26 @@ export function HeroSection() {
               <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-secondary/20 to-primary/30 rounded-3xl blur-2xl" />
               
               <div className="relative rounded-3xl overflow-hidden border border-primary/30 gold-glow">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_0155-JjwVFPGbLK8yCoQLiGFKs2JnWqlMUF.jpeg"
-                  alt="UnicornOS SphinxQASI Oracle"
-                  width={600}
-                  height={600}
-                  className="w-full h-auto"
-                  priority
-                  unoptimized
-                />
+                {!imgError ? (
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_0155-JjwVFPGbLK8yCoQLiGFKs2JnWqlMUF.jpeg"
+                    alt="UnicornOS SphinxQASI Oracle"
+                    width={600}
+                    height={600}
+                    className="w-full h-auto"
+                    priority
+                    unoptimized
+                    onError={() => setImgError(true)}
+                  />
+                ) : (
+                  <div className="w-full aspect-square bg-gradient-to-br from-primary/20 via-secondary/10 to-primary/20 flex items-center justify-center">
+                    <div className="text-center">
+                      <Sparkles className="w-16 h-16 text-primary mx-auto mb-4" />
+                      <p className="text-xl font-bold text-primary">SphinxQASI Oracle</p>
+                      <p className="text-sm text-muted-foreground">UnicornOS</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Floating badge */}

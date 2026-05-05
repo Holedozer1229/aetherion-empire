@@ -4,13 +4,11 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import {
   CheckCircle2,
-  AlertCircle,
-  TrendingUp,
-  PieChart as PieChartIcon,
   FileText,
   QrCode,
   Shield,
 } from "lucide-react";
+import { useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 import {
   PieChart,
@@ -40,6 +38,8 @@ const walletDistribution = [
 ];
 
 export function AuditReport() {
+  const [bgError, setBgError] = useState(false);
+  
   const auditData = {
     subject: "TRAVIS D JONES",
     assetType: "BITCOIN (BTC)",
@@ -55,15 +55,18 @@ export function AuditReport() {
   return (
     <section id="audit" className="py-16 md:py-24 relative overflow-hidden">
       {/* Background decorative image */}
-      <div className="absolute inset-0 overflow-hidden opacity-5">
-        <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_0241-3cF8Mj6CFmpM1VdHNbrS4WZCu3uK5L.png"
-          alt="Background"
-          fill
-          className="object-cover"
-          unoptimized
-        />
-      </div>
+      {!bgError && (
+        <div className="absolute inset-0 overflow-hidden opacity-5">
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_0241-3cF8Mj6CFmpM1VdHNbrS4WZCu3uK5L.png"
+            alt=""
+            fill
+            className="object-cover"
+            unoptimized
+            onError={() => setBgError(true)}
+          />
+        </div>
+      )}
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
