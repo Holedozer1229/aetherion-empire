@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 
 interface UseLiveStreamOptions {
   channel: "mining" | "oracle" | "bounty" | "wingman" | "bitcoin" | "genesis";
@@ -22,37 +22,46 @@ export function useLiveStream({ channel, onData, interval = 10000 }: UseLiveStre
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
-    const endpoint = CHANNEL_ENDPOINTS[channel];
-    if (!endpoint) return;
-
-    try {
-      const res = await fetch(endpoint);
-      const json = await res.json();
-      
-      if (json.success !== false) {
-        const streamData = {
-          channel,
-          timestamp: new Date().toISOString(),
-          data: transformChannelData(channel, json),
-        };
-        setData(streamData);
-        setConnected(true);
-        setError(null);
-        onData?.(streamData);
-      }
-    } catch (err) {
-      console.error(`[v0] Stream fetch failed for ${channel}:`, err);
-      setError(err instanceof Error ? err.message : "Fetch failed");
-      setConnected(false);
-    }
-  }, [channel, onData]);
-
   useEffect(() => {
+    let isMounted = true;
+    
+    const fetchData = async () => {
+      const endpoint = CHANNEL_ENDPOINTS[channel];
+      if (!endpoint) return;
+
+      try {
+        const res = await fetch(endpoint);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const json = await res.json();
+        
+        if (isMounted && json.success !== false) {
+          const streamData = {
+            channel,
+            timestamp: new Date().toISOString(),
+            data: transformChannelData(channel, json),
+          };
+          setData(streamData);
+          setConnected(true);
+          setError(null);
+          onData?.(streamData);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Fetch failed");
+          setConnected(false);
+        }
+      }
+    };
+
     fetchData();
     const pollInterval = setInterval(fetchData, interval);
-    return () => clearInterval(pollInterval);
-  }, [fetchData, interval]);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(pollInterval);
+    };
+  }, [channel, interval]);
 
   return { data, connected, error };
 }
