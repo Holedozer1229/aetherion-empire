@@ -66,7 +66,7 @@ export function FeaturesSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="text-gold-gradient">Protocol Features</span>
+            <span className="text-neon-gradient">Protocol Features</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Cutting-edge technology powering the future of decentralized finance
@@ -81,7 +81,7 @@ export function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="group p-6 gold-border rounded-xl hover:border-primary/50 transition-all duration-300"
+              className="group p-6 neon-border-animate rounded-xl hover:border-primary/50 transition-all duration-300"
             >
               <div className={`inline-flex p-3 rounded-xl ${feature.bgColor} mb-4 group-hover:scale-110 transition-transform`}>
                 <feature.icon className={`w-6 h-6 ${feature.color}`} />

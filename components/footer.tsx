@@ -12,7 +12,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-3 mb-4">
               <Crown className="w-8 h-8 text-primary" />
-              <span className="text-xl font-bold text-gold-gradient">LUCKY PALACE</span>
+              <span className="text-xl font-bold text-neon-gradient">LUCKY PALACE</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-md mb-4">
               Advanced quantum-enhanced DeFi mining protocol with zero-knowledge proof verification. 

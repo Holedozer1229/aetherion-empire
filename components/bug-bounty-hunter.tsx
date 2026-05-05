@@ -174,7 +174,7 @@ export function BugBountyHunter() {
 
   const statusColors = {
     SCANNING: "text-blue-400 bg-blue-400/10",
-    ANALYZING: "text-amber-400 bg-amber-400/10",
+    ANALYZING: "text-neon-cyan-400 bg-neon-cyan-400/10",
     FOUND: "text-secondary bg-secondary/10",
     CLAIMED: "text-primary bg-primary/10",
     PENDING: "text-purple-400 bg-purple-400/10",
@@ -183,7 +183,7 @@ export function BugBountyHunter() {
   const severityColors = {
     CRITICAL: "text-red-500 bg-red-500/10 border-red-500/30",
     HIGH: "text-orange-500 bg-orange-500/10 border-orange-500/30",
-    MEDIUM: "text-amber-400 bg-amber-400/10 border-amber-400/30",
+    MEDIUM: "text-neon-cyan-400 bg-neon-cyan-400/10 border-neon-cyan-400/30",
     LOW: "text-blue-400 bg-blue-400/10 border-blue-400/30",
   };
 
@@ -266,14 +266,14 @@ export function BugBountyHunter() {
                 </div>
                 <p className="text-2xl font-bold text-secondary">{stats.bounties_claimed}</p>
               </div>
-              <div className="p-4 rounded-xl border border-amber-400/30 bg-card/80 backdrop-blur-lg">
+              <div className="p-4 rounded-xl border border-neon-cyan-400/30 bg-card/80 backdrop-blur-lg">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="w-4 h-4 text-amber-400" />
+                  <TrendingUp className="w-4 h-4 text-neon-cyan-400" />
                   <span className="text-xs text-muted-foreground">Success Rate</span>
                 </div>
-                <p className="text-2xl font-bold text-amber-400">{stats.success_rate}</p>
+                <p className="text-2xl font-bold text-neon-cyan-400">{stats.success_rate}</p>
               </div>
-              <div className="p-4 rounded-xl border border-primary/30 bg-card/80 backdrop-blur-lg gold-glow">
+              <div className="p-4 rounded-xl border border-primary/30 bg-card/80 backdrop-blur-lg neon-glow">
                 <div className="flex items-center gap-2 mb-2">
                   <DollarSign className="w-4 h-4 text-primary" />
                   <span className="text-xs text-muted-foreground">Total Claimed</span>
@@ -466,7 +466,7 @@ export function BugBountyHunter() {
                                       ? "text-secondary bg-secondary/10"
                                       : bounty.status === "VERIFIED"
                                       ? "text-blue-400 bg-blue-400/10"
-                                      : "text-amber-400 bg-amber-400/10"
+                                      : "text-neon-cyan-400 bg-neon-cyan-400/10"
                                   }`}
                                 >
                                   {bounty.status}

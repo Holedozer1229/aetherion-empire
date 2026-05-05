@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createHash } from "crypto";
 import {
   PHI,
   A,
@@ -28,10 +29,14 @@ const P = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFF
 const N = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
 
 function computePhi(acc: bigint): { phi: number; resonance: string; harmony: number } {
-  const phi = Number(acc % 1000n) / 1000.0;
+  const phi = Number(acc % BigInt(1000)) / 1000.0;
   const resonance = phi > 0.5 ? "STABLE" : "VOLATILE";
   const harmony = Math.sin(phi * Math.PI);
   return { phi, resonance, harmony };
+}
+
+function sha256(message: string): string {
+  return createHash("sha256").update(message).digest("hex");
 }
 
 async function sha256(message: string): Promise<string> {
