@@ -5,6 +5,7 @@ import { DeFiDashboard } from "@/components/defi-dashboard";
 import { AetherionOracle } from "@/components/aetherion-oracle";
 import { BugBountyHunter } from "@/components/bug-bounty-hunter";
 import { WingmanAgent } from "@/components/wingman-agent";
+import { BitcoinDashboard } from "@/components/bitcoin-dashboard";
 import { MiningDashboard } from "@/components/mining-dashboard";
 import { Achievements } from "@/components/achievements";
 import { Leaderboard } from "@/components/leaderboard";
@@ -27,6 +28,7 @@ export default function LuckyPalacePage() {
         <AetherionOracle />
         <BugBountyHunter />
         <WingmanAgent />
+        <BitcoinDashboard />
         <MiningDashboard />
         <Achievements />
         <Leaderboard />
