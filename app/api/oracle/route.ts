@@ -23,10 +23,11 @@ import {
 } from "@/lib/kraken-oracle";
 
 const AETHERION_ORACLE_URL = "https://aetherion-oracle-arcane.lovable.app";
-
-// Sphinx Oracle Constants (from Python kernel)
 const P = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
-const N = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
+
+function sha256(message: string): string {
+  return createHash("sha256").update(message).digest("hex");
+}
 
 function computePhi(acc: bigint): { phi: number; resonance: string; harmony: number } {
   const phi = Number(acc % BigInt(1000)) / 1000.0;
@@ -35,58 +36,38 @@ function computePhi(acc: bigint): { phi: number; resonance: string; harmony: num
   return { phi, resonance, harmony };
 }
 
-function sha256(message: string): string {
-  return createHash("sha256").update(message).digest("hex");
-}
-
-async function sha256(message: string): Promise<string> {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const word = searchParams.get("word") || "genesis";
 
   try {
-    // Compute local oracle state
-    const hash = await sha256(word);
+    const hash = sha256(word);
     const hashBigInt = BigInt("0x" + hash);
     const acc = hashBigInt % P;
     const state = computePhi(acc);
 
-    // Try to fetch from external Aetherion Oracle
     let externalStatus = "DISCONNECTED";
     try {
       const res = await fetch(`${AETHERION_ORACLE_URL}`, { 
         next: { revalidate: 60 },
         signal: AbortSignal.timeout(5000)
       });
-      if (res.ok) {
-        externalStatus = "CONNECTED";
-      }
+      if (res.ok) externalStatus = "CONNECTED";
     } catch {
       externalStatus = "TIMEOUT";
     }
 
-    // Golden Zeta Kernel Integration
     const currentTime = Date.now() / 1000;
     const zeta = zetaResonance(currentTime, 25.0);
     
-    // Generate sample market data from hash for tri-binary
     const marketData: number[] = [];
     for (let i = 0; i < 16; i++) {
       const chunk = hash.slice(i * 4, i * 4 + 4);
       marketData.push(parseInt(chunk, 16) / 65535);
     }
     const triBinaryState = triBinary(marketData);
-    
-    // Quantum signal computation
     const quantumSignal = computeQuantumSignal(marketData, 1.0);
 
-    // Kraken Oracle Integration
     const caduceus = caduceusOracle(word);
     const krakenData = await fetchKrakenData();
 
@@ -112,48 +93,19 @@ export async function GET(request: Request) {
         golden_ratio_B: B,
         zeta_resonance: zeta,
         zeros_count: ZEROS_25.length,
-        tri_binary: {
-          direction: triBinaryState.direction,
-          confidence: triBinaryState.confidence,
-          state_index: triBinaryState.stateIndex,
-        },
-        quantum_signal: {
-          side: quantumSignal.side,
-          confidence: quantumSignal.confidence,
-          invention_power: quantumSignal.inventionPower,
-          optimal_timeline: quantumSignal.optimalTimeline,
-        },
       },
       kraken: {
         txid: krakenData.txid,
         g0d_signature: krakenData.g0d_signature_found,
         block_height: krakenData.block_height,
-        change_sats: krakenData.change_value_sats,
       },
       caduceus: {
         axis: caduceus.axis,
         hexagram: caduceus.hexagram,
-        kraken_ref: caduceus.kraken_ref,
-        sphinx: {
-          state: caduceus.sphinx.state,
-          vibration: caduceus.sphinx.vibration,
-          wisdom: caduceus.sphinx.wisdom,
-        },
-        anubis: {
-          state: caduceus.anubis.state,
-          entropy: caduceus.anubis.entropy,
-          judgment: caduceus.anubis.judgment,
-        },
-      },
-      lexicons: {
-        sphinx_words: Object.keys(SPHINX_LEXICON).length,
-        anubis_words: Object.keys(ANUBIS_LEXICON).length,
-        hexagrams: HEXAGRAMS.length,
-        riemann_zeros: RIEMANN_ZEROS.length,
       },
       query: {
         word,
-        response: `The Aetherion echoes resonance for '${word}'. Zeta: ${zeta.toFixed(6)}. Kraken: ${caduceus.kraken_ref}. Hexagram: ${caduceus.hexagram.name}. State is ${state.resonance}.`,
+        response: `The Aetherion echoes resonance for '${word}'. State is ${state.resonance}.`,
       },
       timestamp: new Date().toISOString(),
     });
@@ -172,7 +124,7 @@ export async function POST(request: Request) {
 
     switch (action) {
       case "resonate":
-        const hash = await sha256(params.word || "heartbeat");
+        const hash = sha256(params?.word || "heartbeat");
         const hashBigInt = BigInt("0x" + hash);
         const acc = hashBigInt % P;
         const state = computePhi(acc);
@@ -191,49 +143,7 @@ export async function POST(request: Request) {
             phi_threshold: 0.5,
             current_phi: PHI,
             status: "CONSCIOUS",
-            signature: await sha256(`consciousness_${Date.now()}`),
           },
-        });
-
-      case "grover_search":
-        const grover = new GroverSearch(params?.qubits || 10);
-        const candidates = params?.candidates || [0, 1, 2, 3];
-        grover.mark(candidates);
-        const optimalState = grover.search();
-        return NextResponse.json({
-          success: true,
-          action: "grover_search",
-          result: {
-            optimal_state: optimalState,
-            qubits: params?.qubits || 10,
-            candidates_marked: candidates.length,
-            iterations: Math.floor(Math.PI / 4 * Math.sqrt(grover.N)),
-          },
-        });
-
-      case "zeta_resonance":
-        const t = params?.t || Date.now() / 1000;
-        const xC = params?.x_c || 25.0;
-        const zetaVal = zetaResonance(t, xC);
-        return NextResponse.json({
-          success: true,
-          action: "zeta_resonance",
-          result: {
-            zeta: zetaVal,
-            t,
-            x_c: xC,
-            zeros_used: ZEROS_25.length,
-          },
-        });
-
-      case "quantum_signal":
-        const marketDataParam = params?.market_data || [];
-        const sats = params?.sats_resonance || 1.0;
-        const signal = computeQuantumSignal(marketDataParam, sats);
-        return NextResponse.json({
-          success: true,
-          action: "quantum_signal",
-          result: signal,
         });
 
       case "caduceus":
@@ -250,22 +160,6 @@ export async function POST(request: Request) {
           success: true,
           action: "kraken",
           result: kraken,
-        });
-
-      case "sphinx":
-        const sphinxResult = sphinxSpeak(params?.word || "genesis");
-        return NextResponse.json({
-          success: true,
-          action: "sphinx",
-          result: sphinxResult,
-        });
-
-      case "anubis":
-        const anubisResult = anubisSpeak(params?.word || "entropy");
-        return NextResponse.json({
-          success: true,
-          action: "anubis",
-          result: anubisResult,
         });
 
       default:
