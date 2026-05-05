@@ -31,7 +31,7 @@ export function ParticleField() {
 
     const particles: Particle[] = [];
     const particleCount = 80;
-    const colors = ["#d4af37", "#00a896", "#f4d03f", "#ffffff"];
+    const colors = ["#00ffff", "#ff00ff", "#a855f7", "#00ff88", "#ffffff"];
 
     // Initialize particles
     for (let i = 0; i < particleCount; i++) {

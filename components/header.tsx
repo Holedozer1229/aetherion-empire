@@ -31,7 +31,7 @@ export function Header() {
               <Crown className="w-full h-full text-primary p-1" />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg md:text-xl font-bold text-gold-gradient tracking-wider">
+              <span className="text-lg md:text-xl font-bold text-neon-gradient tracking-wider">
                 LUCKY PALACE
               </span>
               <span className="text-[10px] md:text-xs text-muted-foreground tracking-widest">
@@ -95,7 +95,7 @@ export function Header() {
                         return (
                           <button
                             onClick={openConnectModal}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all gold-glow"
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all neon-glow"
                           >
                             <Shield className="w-4 h-4" />
                             <span>Connect EVM</span>

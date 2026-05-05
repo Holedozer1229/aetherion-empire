@@ -92,7 +92,7 @@ export function PayoutManifest() {
             <span className="text-sm text-secondary font-medium">Lucky Palace Protocol</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="text-gold-gradient">Payout Manifest</span>
+            <span className="text-neon-gradient">Payout Manifest</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Verified transaction settlement with zero-knowledge proof verification

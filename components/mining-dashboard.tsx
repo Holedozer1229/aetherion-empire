@@ -71,7 +71,7 @@ export function MiningDashboard() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="text-gold-gradient">Mining Summary</span>
+            <span className="text-neon-gradient">Mining Summary</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Deep-Ledger Division verified mining operations with full audit trail
@@ -87,7 +87,7 @@ export function MiningDashboard() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="gold-border rounded-xl p-4 md:p-6"
+              className="neon-border-animate rounded-xl p-4 md:p-6"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className={`p-2 rounded-lg bg-card ${stat.color}`}>

@@ -80,7 +80,7 @@ export function AuditReport() {
             <span className="text-sm text-primary font-medium">TOP-SECRET // KRAKEN AUDIT REPORT</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="text-gold-gradient">Clearance Level: {auditData.clearanceLevel}</span>
+            <span className="text-neon-gradient">Clearance Level: {auditData.clearanceLevel}</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Deep-Ledger Division comprehensive asset verification
@@ -179,7 +179,7 @@ export function AuditReport() {
                   className="relative w-40 h-40 md:w-48 md:h-48"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-primary/10 rounded-full blur-xl" />
-                  <div className="relative w-full h-full rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center border-4 border-primary/50 gold-glow">
+                  <div className="relative w-full h-full rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center border-4 border-primary/50 neon-glow">
                     <span className="text-6xl md:text-7xl font-bold text-primary-foreground">₿</span>
                   </div>
                 </motion.div>

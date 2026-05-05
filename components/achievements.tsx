@@ -92,7 +92,7 @@ const rarityColors = {
   common: "from-gray-500/20 to-gray-600/20 border-gray-500/30",
   rare: "from-blue-500/20 to-blue-600/20 border-blue-500/30",
   epic: "from-purple-500/20 to-purple-600/20 border-purple-500/30",
-  legendary: "from-primary/20 to-amber-600/20 border-primary/30",
+  legendary: "from-primary/20 to-neon-cyan-600/20 border-primary/30",
   mythic: "from-rose-500/20 to-pink-600/20 border-rose-500/30",
 };
 
@@ -100,7 +100,7 @@ const rarityGlow = {
   common: "",
   rare: "shadow-blue-500/10",
   epic: "shadow-purple-500/20",
-  legendary: "gold-glow",
+  legendary: "neon-glow",
   mythic: "shadow-rose-500/20 shadow-lg",
 };
 

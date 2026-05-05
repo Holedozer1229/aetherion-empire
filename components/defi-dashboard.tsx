@@ -318,7 +318,7 @@ export function DeFiDashboard() {
                     "w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-3",
                     quantumState?.resonance === "STABLE"
                       ? "bg-green-500/20"
-                      : "bg-yellow-500/20"
+                      : "bg-neon-pink-500/20"
                   )}
                 >
                   <Lock
@@ -326,7 +326,7 @@ export function DeFiDashboard() {
                       "w-8 h-8",
                       quantumState?.resonance === "STABLE"
                         ? "text-green-500"
-                        : "text-yellow-500"
+                        : "text-neon-pink-500"
                     )}
                   />
                 </div>
@@ -336,7 +336,7 @@ export function DeFiDashboard() {
                     "text-xl font-bold",
                     quantumState?.resonance === "STABLE"
                       ? "text-green-500"
-                      : "text-yellow-500"
+                      : "text-neon-pink-500"
                   )}
                 >
                   {quantumState?.resonance || "INITIALIZING"}

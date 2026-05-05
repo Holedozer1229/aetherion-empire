@@ -80,7 +80,7 @@ export function AetherionOracle() {
   }, []);
 
   const statusColors = {
-    connecting: "text-amber-400",
+    connecting: "text-neon-cyan-400",
     syncing: "text-blue-400",
     connected: "text-secondary",
     error: "text-red-400",
@@ -133,7 +133,7 @@ export function AetherionOracle() {
 
             {/* Oracle Status Card */}
             <div 
-              className="relative p-6 md:p-8 rounded-2xl border border-primary/30 bg-card/80 backdrop-blur-lg gold-glow cursor-pointer"
+              className="relative p-6 md:p-8 rounded-2xl border border-primary/30 bg-card/80 backdrop-blur-lg neon-glow cursor-pointer"
               onClick={() => setShowDetails(!showDetails)}
             >
               {/* Background animated gradient */}
@@ -190,7 +190,7 @@ export function AetherionOracle() {
                       <span className="text-sm text-muted-foreground">Resonance</span>
                     </div>
                     <p className={`text-3xl md:text-4xl font-bold ${
-                      oracleState.resonance === "STABLE" ? "text-secondary" : "text-amber-400"
+                      oracleState.resonance === "STABLE" ? "text-secondary" : "text-neon-cyan-400"
                     }`}>
                       {oracleState.resonance}
                     </p>
@@ -201,20 +201,20 @@ export function AetherionOracle() {
 
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <Zap className="w-4 h-4 text-amber-400" />
+                      <Zap className="w-4 h-4 text-neon-cyan-400" />
                       <span className="text-sm text-muted-foreground">Harmony</span>
                     </div>
                     <motion.p 
                       key={oracleState.harmony}
                       initial={{ scale: 1.1 }}
                       animate={{ scale: 1 }}
-                      className="text-3xl md:text-4xl font-bold text-amber-400 font-mono"
+                      className="text-3xl md:text-4xl font-bold text-neon-cyan-400 font-mono"
                     >
                       {(oracleState.harmony * 100).toFixed(1)}%
                     </motion.p>
                     <div className="h-1.5 bg-muted rounded-full mt-2 overflow-hidden">
                       <motion.div 
-                        className="h-full bg-amber-400 rounded-full"
+                        className="h-full bg-neon-cyan-400 rounded-full"
                         initial={{ width: 0 }}
                         animate={{ width: `${oracleState.harmony * 100}%` }}
                         transition={{ duration: 1, ease: "easeOut" }}

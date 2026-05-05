@@ -63,7 +63,7 @@ const iconMap = {
 const colorMap = {
   mining: "text-secondary",
   payout: "text-primary",
-  achievement: "text-amber-400",
+  achievement: "text-neon-cyan-400",
   whale: "text-blue-400",
 };
 
@@ -104,7 +104,7 @@ export function SocialProof() {
             exit={{ opacity: 0, x: -100 }}
             className="fixed bottom-6 left-6 z-50 max-w-sm"
           >
-            <div className="flex items-center gap-3 p-4 bg-card/95 backdrop-blur-lg border border-primary/30 rounded-xl shadow-2xl gold-glow">
+            <div className="flex items-center gap-3 p-4 bg-card/95 backdrop-blur-lg border border-primary/30 rounded-xl shadow-2xl neon-glow">
               <div className={`p-2 rounded-lg bg-muted ${colorMap[visible.type]}`}>
                 {(() => {
                   const Icon = iconMap[visible.type];

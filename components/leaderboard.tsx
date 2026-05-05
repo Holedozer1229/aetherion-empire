@@ -61,7 +61,7 @@ const rankIcons = {
 const rankColors = {
   1: "text-primary bg-primary/10 border-primary/30",
   2: "text-gray-300 bg-gray-300/10 border-gray-300/30",
-  3: "text-amber-600 bg-amber-600/10 border-amber-600/30",
+  3: "text-neon-cyan-600 bg-neon-cyan-600/10 border-neon-cyan-600/30",
 };
 
 export function Leaderboard() {
@@ -103,7 +103,7 @@ export function Leaderboard() {
                 whileHover={{ scale: 1.01 }}
                 className={`relative flex items-center gap-4 p-4 md:p-5 rounded-xl border transition-all ${
                   entry.isYou
-                    ? "bg-primary/5 border-primary/40 gold-glow"
+                    ? "bg-primary/5 border-primary/40 neon-glow"
                     : "bg-muted/20 border-primary/10 hover:border-primary/30"
                 }`}
               >

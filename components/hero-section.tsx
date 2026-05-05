@@ -32,7 +32,7 @@ export function HeroSection() {
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight">
-              <span className="text-gold-gradient">The Lucky Palace</span>
+              <span className="text-neon-gradient">The Lucky Palace</span>
               <br />
               <span className="text-foreground">Quantum DeFi</span>
               <br />
@@ -45,7 +45,7 @@ export function HeroSection() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-              <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all gold-glow">
+              <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all neon-glow">
                 <Zap className="w-5 h-5" />
                 Start Mining
                 <ArrowRight className="w-5 h-5" />
@@ -84,7 +84,7 @@ export function HeroSection() {
               {/* Glow effect behind image */}
               <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-secondary/20 to-primary/30 rounded-3xl blur-2xl" />
               
-              <div className="relative rounded-3xl overflow-hidden border border-primary/30 gold-glow">
+              <div className="relative rounded-3xl overflow-hidden border border-primary/30 neon-glow">
                 {!imgError ? (
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_0155-JjwVFPGbLK8yCoQLiGFKs2JnWqlMUF.jpeg"
