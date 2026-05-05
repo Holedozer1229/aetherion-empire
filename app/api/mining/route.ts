@@ -11,7 +11,7 @@ interface MiningState {
 // Simulated vault addresses from Python files
 const VAULTS = {
   btc: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-  eth: "0x742d35Cc6634C0532925a3b844Bc9e7595f5Ed1b",
+  eth: "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20",
   sol: "3a5W4NmDavSbivQ2UAxRGe4Np5YYcRVPN3uM4St7YZ2z",
 };
 

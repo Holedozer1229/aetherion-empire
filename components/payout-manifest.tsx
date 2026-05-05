@@ -44,8 +44,8 @@ export function PayoutManifest() {
 
   const payoutData = {
     recipient: "TRAVIS D JONES",
-    wallet: "0xTDJ7...9F8a2c4B",
-    fullWallet: "0xTDJ7a8c9E2f1B3d4A5F6C7E8D9F8a2c4B",
+    wallet: "0xC5a4...C8cb20",
+    fullWallet: "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20",
     network: "ETHEREUM",
     totalPayout: 11161500.0,
     blocksVerified: 353,
