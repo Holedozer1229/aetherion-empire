@@ -40,6 +40,7 @@ const profitData = [
 
 export function PayoutManifest() {
   const [copied, setCopied] = useState(false);
+  const [bgError, setBgError] = useState(false);
 
   const payoutData = {
     recipient: "TRAVIS D JONES",
@@ -66,15 +67,18 @@ export function PayoutManifest() {
   return (
     <section id="payouts" className="py-16 md:py-24 relative">
       {/* Background Image */}
-      <div className="absolute inset-0 overflow-hidden opacity-10">
-        <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_0239-RxRokjwNBe98qbs9fCU9cDeIcrJ2pC.png"
-          alt="Background"
-          fill
-          className="object-cover"
-          unoptimized
-        />
-      </div>
+      {!bgError && (
+        <div className="absolute inset-0 overflow-hidden opacity-10">
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_0239-RxRokjwNBe98qbs9fCU9cDeIcrJ2pC.png"
+            alt=""
+            fill
+            className="object-cover"
+            unoptimized
+            onError={() => setBgError(true)}
+          />
+        </div>
+      )}
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
