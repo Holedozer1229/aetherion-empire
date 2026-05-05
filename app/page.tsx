@@ -3,6 +3,7 @@ import { HeroSection } from "@/components/hero-section";
 import { LiveStats } from "@/components/live-stats";
 import { DeFiDashboard } from "@/components/defi-dashboard";
 import { AetherionOracle } from "@/components/aetherion-oracle";
+import { BugBountyHunter } from "@/components/bug-bounty-hunter";
 import { MiningDashboard } from "@/components/mining-dashboard";
 import { Achievements } from "@/components/achievements";
 import { Leaderboard } from "@/components/leaderboard";
@@ -23,6 +24,7 @@ export default function LuckyPalacePage() {
         <LiveStats />
         <DeFiDashboard />
         <AetherionOracle />
+        <BugBountyHunter />
         <MiningDashboard />
         <Achievements />
         <Leaderboard />
