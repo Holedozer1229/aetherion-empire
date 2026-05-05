@@ -308,7 +308,7 @@ export function DeFiDashboard() {
                 </div>
                 <p className="text-sm text-muted-foreground">Phi Metric</p>
                 <p className="text-xl font-bold text-primary">
-                  {quantumState?.phi.toFixed(4) || "0.0000"}
+                  {quantumState?.phi !== undefined ? quantumState.phi.toFixed(4) : "0.0000"}
                 </p>
               </div>
 
@@ -349,7 +349,7 @@ export function DeFiDashboard() {
                 </div>
                 <p className="text-sm text-muted-foreground">Harmony Index</p>
                 <p className="text-xl font-bold text-primary">
-                  {quantumState?.harmony.toFixed(4) || "0.0000"}
+                  {quantumState?.harmony !== undefined ? quantumState.harmony.toFixed(4) : "0.0000"}
                 </p>
               </div>
 

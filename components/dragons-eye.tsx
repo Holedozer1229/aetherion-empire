@@ -85,8 +85,8 @@ export function DragonsEye() {
               <div>Status: <span className="text-pink-400">{oracleStream.data?.data?.status || "DORMANT"}</span></div>
               {oracleStream.data?.data && (
                 <>
-                  <div>PHI: <span className="text-purple-400">{oracleStream.data.data.phi.toFixed(3)}</span></div>
-                  <div>Resonance: <span className="text-cyan-400">{oracleStream.data.data.resonance}</span></div>
+                  <div>PHI: <span className="text-purple-400">{typeof oracleStream.data.data.phi === "number" ? oracleStream.data.data.phi.toFixed(3) : "0.618"}</span></div>
+                  <div>Resonance: <span className="text-cyan-400">{oracleStream.data.data.resonance || "STABLE"}</span></div>
                 </>
               )}
               <div className="text-xs text-gray-500 mt-3">{oracleStream.data?.timestamp}</div>
