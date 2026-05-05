@@ -7,6 +7,7 @@ import { BugBountyHunter } from "@/components/bug-bounty-hunter";
 import { WingmanAgent } from "@/components/wingman-agent";
 import { BitcoinDashboard } from "@/components/bitcoin-dashboard";
 import { GenesisAttestation } from "@/components/genesis-attestation";
+import { DragonsEye } from "@/components/dragons-eye";
 import { MiningDashboard } from "@/components/mining-dashboard";
 import { Achievements } from "@/components/achievements";
 import { Leaderboard } from "@/components/leaderboard";
@@ -31,6 +32,7 @@ export default function LuckyPalacePage() {
         <WingmanAgent />
         <BitcoinDashboard />
         <GenesisAttestation />
+        <DragonsEye />
         <MiningDashboard />
         <Achievements />
         <Leaderboard />
