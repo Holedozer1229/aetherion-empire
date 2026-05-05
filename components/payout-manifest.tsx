@@ -12,7 +12,7 @@ import {
   Clock,
   Network,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { formatCurrency, shortenAddress } from "@/lib/utils";
 import {
   BarChart,
@@ -24,53 +24,30 @@ import {
   Tooltip,
 } from "recharts";
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const profitData = [
+  { month: "Jan", profit: 2100000 },
+  { month: "Feb", profit: 2800000 },
+  { month: "Mar", profit: 3200000 },
+  { month: "Apr", profit: 4100000 },
+  { month: "May", profit: 5200000 },
+  { month: "Jun", profit: 6400000 },
+  { month: "Jul", profit: 7500000 },
+  { month: "Aug", profit: 8200000 },
+  { month: "Sep", profit: 9100000 },
+  { month: "Oct", profit: 10200000 },
+  { month: "Nov", profit: 11161500 },
+];
 
 export function PayoutManifest() {
   const [copied, setCopied] = useState(false);
   const [bgError, setBgError] = useState(false);
-  const [profitData, setProfitData] = useState<{ month: string; profit: number }[]>([]);
-  const [btcPrice, setBtcPrice] = useState<number>(0);
-
-  useEffect(() => {
-    const fetchPriceHistory = async () => {
-      try {
-        // CoinGecko free API — BTC/USD daily close for past 12 months
-        const res = await fetch(
-          "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=365&interval=monthly"
-        );
-        if (!res.ok) throw new Error("coingecko failed");
-        const json = await res.json();
-        const prices: [number, number][] = json.prices ?? [];
-        // Each entry is [timestamp_ms, price]. 60 BTC × monthly price
-        const mapped = prices.slice(-12).map(([ts, price]) => {
-          const d = new Date(ts);
-          return { month: MONTHS[d.getMonth()], profit: Math.round(60 * price) };
-        });
-        setProfitData(mapped);
-        if (mapped.length > 0) {
-          setBtcPrice(mapped[mapped.length - 1].profit / 60);
-        }
-      } catch {
-        // fallback: fetch current price only
-        try {
-          const r = await fetch("/api/bitcoin");
-          const j = await r.json();
-          if (j.btc_price_usd) setBtcPrice(j.btc_price_usd);
-        } catch {}
-      }
-    };
-    fetchPriceHistory();
-  }, []);
-
-  const totalPayout = btcPrice > 0 ? 60 * btcPrice : 0;
 
   const payoutData = {
     recipient: "TRAVIS D JONES",
     wallet: "0xC5a4...C8cb20",
     fullWallet: "0xC5a47C9adaB637d1CAA791CCe193079d22C8cb20",
-    network: "BITCOIN / ETHEREUM",
-    totalPayout,
+    network: "ETHEREUM",
+    totalPayout: 11161500.0,
     blocksVerified: 353,
     status: "COMPLETE",
     transactionId: "0x7e3b...c8d9f2a7e4b6c9d8f1e0a",

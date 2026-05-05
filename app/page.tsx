@@ -31,6 +31,7 @@ export default function LuckyPalacePage() {
         <BugBountyHunter />
         <WingmanAgent />
         <BitcoinDashboard />
+        <SolanaDashboard />
         <GenesisAttestation />
         <DragonsEye />
         <MiningDashboard />

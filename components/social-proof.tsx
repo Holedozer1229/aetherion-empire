@@ -2,104 +2,137 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, ArrowRightLeft, Users } from "lucide-react";
+import { Zap, TrendingUp, Users, Award, Coins } from "lucide-react";
 
-interface MempoolTx {
+interface Notification {
   id: string;
-  txid: string;
-  value: number;
-  fee: number;
-  size: number;
+  type: "mining" | "payout" | "achievement" | "whale";
+  message: string;
+  amount?: string;
+  user: string;
+  timestamp: Date;
 }
 
-function shortenTxid(txid: string) {
-  return `${txid.slice(0, 6)}...${txid.slice(-6)}`;
-}
+const generateNotification = (): Notification => {
+  const types = ["mining", "payout", "achievement", "whale"] as const;
+  const type = types[Math.floor(Math.random() * types.length)];
+  const users = [
+    "0xC5a4...C8cb",
+    "0x7a2b...9f12",
+    "0x3e8c...d4a1",
+    "0x9b1f...c82e",
+    "0x4d6a...7b93",
+    "0x8f2e...1a5c",
+  ];
+  const user = users[Math.floor(Math.random() * users.length)];
 
-function formatBTC(sats: number) {
-  return (sats / 1e8).toFixed(6) + " BTC";
-}
+  const notifications: Record<typeof type, { message: string; amount?: string }> = {
+    mining: {
+      message: "Just mined a block",
+      amount: `+${(Math.random() * 0.5).toFixed(4)} ETH`,
+    },
+    payout: {
+      message: "Claimed mining rewards",
+      amount: `$${(Math.random() * 5000 + 500).toFixed(2)}`,
+    },
+    achievement: {
+      message: "Unlocked Diamond Miner badge",
+    },
+    whale: {
+      message: "Deposited into vault",
+      amount: `${(Math.random() * 50 + 10).toFixed(2)} ETH`,
+    },
+  };
+
+  return {
+    id: Math.random().toString(36).substr(2, 9),
+    type,
+    ...notifications[type],
+    user,
+    timestamp: new Date(),
+  };
+};
+
+const iconMap = {
+  mining: Zap,
+  payout: Coins,
+  achievement: Award,
+  whale: TrendingUp,
+};
+
+const colorMap = {
+  mining: "text-secondary",
+  payout: "text-primary",
+  achievement: "text-neon-cyan-400",
+  whale: "text-blue-400",
+};
 
 export function SocialProof() {
-  const [txns, setTxns] = useState<MempoolTx[]>([]);
-  const [visible, setVisible] = useState<MempoolTx | null>(null);
-  const [toastIndex, setToastIndex] = useState(0);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [visible, setVisible] = useState<Notification | null>(null);
 
   useEffect(() => {
-    let mounted = true;
+    // Generate initial notifications
+    const initial = Array.from({ length: 5 }, generateNotification);
+    setNotifications(initial);
 
-    const fetchMempool = async () => {
-      try {
-        const res = await fetch("https://mempool.space/api/mempool/recent");
-        if (!res.ok) throw new Error("mempool fetch failed");
-        const data: any[] = await res.json();
-        if (mounted && Array.isArray(data) && data.length > 0) {
-          const mapped: MempoolTx[] = data.slice(0, 25).map((tx: any) => ({
-            id: tx.txid,
-            txid: tx.txid,
-            value: tx.value ?? 0,
-            fee: tx.fee ?? 0,
-            size: tx.size ?? 0,
-          }));
-          setTxns(mapped);
-        }
-      } catch {
-        // silently fail — no mock fallback
-      }
-    };
+    // Show notifications in sequence
+    const showInterval = setInterval(() => {
+      const newNotification = generateNotification();
+      setNotifications((prev) => [newNotification, ...prev.slice(0, 9)]);
+      setVisible(newNotification);
 
-    fetchMempool();
-    const pollInterval = setInterval(fetchMempool, 15000);
-    return () => {
-      mounted = false;
-      clearInterval(pollInterval);
-    };
+      // Hide after 4 seconds
+      setTimeout(() => setVisible(null), 4000);
+    }, 8000);
+
+    // Show first notification
+    setTimeout(() => setVisible(initial[0]), 1000);
+    setTimeout(() => setVisible(null), 5000);
+
+    return () => clearInterval(showInterval);
   }, []);
-
-  // Cycle through real txns as toast notifications
-  useEffect(() => {
-    if (txns.length === 0) return;
-    const idx = toastIndex % txns.length;
-    setVisible(txns[idx]);
-    const hideTimer = setTimeout(() => setVisible(null), 4500);
-    const nextTimer = setTimeout(() => setToastIndex((i) => i + 1), 8000);
-    return () => {
-      clearTimeout(hideTimer);
-      clearTimeout(nextTimer);
-    };
-  }, [toastIndex, txns]);
 
   return (
     <>
-      {/* Floating toast */}
+      {/* Floating notification toast */}
       <AnimatePresence>
         {visible && (
           <motion.div
-            key={visible.txid}
-            initial={{ opacity: 0, x: -100 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: -100, y: 0 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
             exit={{ opacity: 0, x: -100 }}
-            className="fixed bottom-6 left-6 z-50 max-w-xs"
+            className="fixed bottom-6 left-6 z-50 max-w-sm"
           >
             <div className="flex items-center gap-3 p-4 bg-card/95 backdrop-blur-lg border border-primary/30 rounded-xl shadow-2xl neon-glow">
-              <div className="p-2 rounded-lg bg-muted text-secondary">
-                <Zap className="w-5 h-5" />
+              <div className={`p-2 rounded-lg bg-muted ${colorMap[visible.type]}`}>
+                {(() => {
+                  const Icon = iconMap[visible.type];
+                  return <Icon className="w-5 h-5" />;
+                })()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground">Live Mempool Tx</p>
-                <p className="text-sm font-mono text-foreground truncate">
-                  {shortenTxid(visible.txid)}
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm text-muted-foreground">
+                    {visible.user}
+                  </span>
+                  <span className="text-xs text-muted-foreground">just now</span>
+                </div>
+                <p className="text-sm font-medium text-foreground truncate">
+                  {visible.message}
                 </p>
-                <p className="text-sm font-bold text-primary">
-                  {formatBTC(visible.value)}
-                </p>
+                {visible.amount && (
+                  <p className={`text-sm font-bold ${colorMap[visible.type]}`}>
+                    {visible.amount}
+                  </p>
+                )}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Activity feed */}
+      {/* Activity feed section */}
       <section className="py-12 bg-gradient-to-b from-card/50 to-background">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
@@ -108,10 +141,8 @@ export function SocialProof() {
                 <Users className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-foreground">Live Mempool</h3>
-                <p className="text-sm text-muted-foreground">
-                  Real-time Bitcoin mainnet transactions
-                </p>
+                <h3 className="text-lg font-bold text-foreground">Live Activity</h3>
+                <p className="text-sm text-muted-foreground">Real-time network transactions</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -120,41 +151,45 @@ export function SocialProof() {
             </div>
           </div>
 
-          {txns.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Connecting to Bitcoin mempool...
-            </p>
-          ) : (
-            <div className="grid gap-3 max-h-80 overflow-hidden">
-              <AnimatePresence mode="popLayout">
-                {txns.slice(0, 6).map((tx, i) => (
+          <div className="grid gap-3 max-h-80 overflow-hidden">
+            <AnimatePresence mode="popLayout">
+              {notifications.slice(0, 6).map((notification, i) => {
+                const Icon = iconMap[notification.type];
+                return (
                   <motion.div
-                    key={tx.txid}
+                    key={notification.id}
                     initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1 - i * 0.12, y: 0 }}
+                    animate={{ opacity: 1 - i * 0.15, y: 0 }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
                     className="flex items-center gap-4 p-4 bg-muted/30 rounded-xl border border-primary/10 hover:border-primary/30 transition-colors"
                   >
-                    <div className="p-2 rounded-lg bg-card text-secondary">
-                      <ArrowRightLeft className="w-4 h-4" />
+                    <div className={`p-2 rounded-lg bg-card ${colorMap[notification.type]}`}>
+                      <Icon className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-mono text-sm text-foreground truncate">
-                        {shortenTxid(tx.txid)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {tx.size} bytes · {tx.fee} sats fee
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm text-foreground">
+                          {notification.user}
+                        </span>
+                        <span className="text-muted-foreground text-sm">
+                          {notification.message}
+                        </span>
+                      </div>
                     </div>
-                    <span className="font-bold text-primary text-sm whitespace-nowrap">
-                      {formatBTC(tx.value)}
+                    {notification.amount && (
+                      <span className={`font-bold ${colorMap[notification.type]}`}>
+                        {notification.amount}
+                      </span>
+                    )}
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      just now
                     </span>
                   </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
+                );
+              })}
+            </AnimatePresence>
+          </div>
         </div>
       </section>
     </>

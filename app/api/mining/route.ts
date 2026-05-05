@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 
-// Use Cloudflare's free public ETH RPC when no key is configured
-const ETH_RPC = process.env.INFURA_API_KEY
+const INFURA_RPC = process.env.INFURA_API_KEY
   ? `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`
-  : process.env.ALCHEMY_API_KEY
-  ? `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
-  : "https://cloudflare-eth.com";
+  : "https://eth-mainnet.g.alchemy.com/v2/" + process.env.ALCHEMY_API_KEY;
 
 const SOLANA_RPC = "https://api.mainnet-beta.solana.com";
 
@@ -14,53 +11,92 @@ const VAULTS = {
   sol: "3a5W4NmDavSbivQ2UAxRGe4Np5YYcRVPN3uM4St7YZ2z",
 };
 
-async function rpcCall(url: string, method: string, params: unknown[] = []): Promise<unknown> {
+interface EthBlock {
+  number: string;
+  baseFeePerGas?: string;
+  gasUsed: string;
+  miner: string;
+  timestamp: string;
+}
+
+async function getEthBlockData(): Promise<EthBlock | null> {
   try {
-    const res = await fetch(url, {
+    const res = await fetch(INFURA_RPC, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ jsonrpc: "2.0", method, params, id: 1 }),
-      signal: AbortSignal.timeout(5000),
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_getBlockByNumber",
+        params: ["latest", false],
+        id: 1,
+      }),
     });
-    const ct = res.headers.get("content-type") ?? "";
-    if (!res.ok || !ct.includes("application/json")) return null;
     const data = await res.json();
-    return data?.result ?? null;
-  } catch {
+    return data.result;
+  } catch (err) {
+    console.error("[v0] ETH block fetch failed:", err);
     return null;
   }
 }
 
-async function getEthBlockData() {
-  const result = await rpcCall(ETH_RPC, "eth_getBlockByNumber", ["latest", false]);
-  if (!result || typeof result !== "object") return null;
-  const block = result as Record<string, string>;
-  return {
-    number: parseInt(block.number ?? "0x0", 16),
-    baseFeePerGas: block.baseFeePerGas
-      ? (parseInt(block.baseFeePerGas, 16) / 1e9).toFixed(2)
-      : null,
-    gasUsed: parseInt(block.gasUsed ?? "0x0", 16),
-    miner: block.miner ?? null,
-    timestamp: block.timestamp ? new Date(parseInt(block.timestamp, 16) * 1000).toISOString() : null,
-  };
-}
-
 async function getEthGasPrice(): Promise<string | null> {
-  const result = await rpcCall(ETH_RPC, "eth_gasPrice");
-  if (!result || typeof result !== "string") return null;
-  return (parseInt(result, 16) / 1e9).toFixed(2);
-}
-
-async function getEthBalance(address: string): Promise<string | null> {
-  const result = await rpcCall(ETH_RPC, "eth_getBalance", [address, "latest"]);
-  if (!result || typeof result !== "string") return null;
-  return (parseInt(result, 16) / 1e18).toFixed(6);
+  try {
+    const res = await fetch(INFURA_RPC, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_gasPrice",
+        params: [],
+        id: 1,
+      }),
+    });
+    const data = await res.json();
+    return data.result;
+  } catch (err) {
+    console.error("[v0] ETH gas price fetch failed:", err);
+    return null;
+  }
 }
 
 async function getSolanaSlot(): Promise<number | null> {
-  const result = await rpcCall(SOLANA_RPC, "getSlot");
-  return typeof result === "number" ? result : null;
+  try {
+    const res = await fetch(SOLANA_RPC, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "getSlot",
+        params: [],
+        id: 1,
+      }),
+    });
+    const data = await res.json();
+    return data.result;
+  } catch (err) {
+    console.error("[v0] Solana slot fetch failed:", err);
+    return null;
+  }
+}
+
+async function getEthBalance(address: string): Promise<string | null> {
+  try {
+    const res = await fetch(INFURA_RPC, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_getBalance",
+        params: [address, "latest"],
+        id: 1,
+      }),
+    });
+    const data = await res.json();
+    return data.result ? (BigInt(data.result) / BigInt(10 ** 18)).toString() : null;
+  } catch (err) {
+    console.error("[v0] ETH balance fetch failed:", err);
+    return null;
+  }
 }
 
 export async function GET() {
@@ -71,27 +107,30 @@ export async function GET() {
     getEthBalance(VAULTS.eth),
   ]);
 
+  const blockNum = ethBlock ? parseInt(ethBlock.number) : 0;
+  const gasPriceGwei = gasPrice ? (BigInt(gasPrice) / BigInt(10 ** 9)).toString() : "0";
+
   return NextResponse.json({
     success: true,
     timestamp: new Date().toISOString(),
     mainnet: {
       ethereum: {
-        current_block: ethBlock?.number ?? null,
-        gas_price_gwei: gasPrice ?? null,
-        base_fee_gwei: ethBlock?.baseFeePerGas ?? null,
-        miner: ethBlock?.miner ?? null,
-        block_timestamp: ethBlock?.timestamp ?? null,
+        current_block: blockNum,
+        gas_price_gwei: gasPriceGwei,
         vault_address: VAULTS.eth,
-        vault_balance_eth: ethBalance ?? null,
+        vault_balance_eth: ethBalance,
         network: "MAINNET",
       },
       solana: {
-        current_slot: solSlot ?? null,
+        current_slot: solSlot,
         vault_address: VAULTS.sol,
         network: "MAINNET",
       },
     },
-    rpc_endpoint: ETH_RPC.replace(/\/v[23]\/[^/]+$/, "/v3/***"),
+    rpc_endpoints: {
+      eth: INFURA_RPC.split("/").slice(0, 3).join("/") + "/v3/***",
+      sol: SOLANA_RPC,
+    },
   });
 }
 
