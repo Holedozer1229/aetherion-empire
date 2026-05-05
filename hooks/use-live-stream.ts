@@ -1,55 +1,107 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { io, Socket } from "socket.io-client";
+import { useEffect, useState } from "react";
 
 interface UseLiveStreamOptions {
   channel: "mining" | "oracle" | "bounty" | "wingman" | "bitcoin" | "genesis";
   onData?: (data: any) => void;
+  interval?: number;
 }
 
-export function useLiveStream({ channel, onData }: UseLiveStreamOptions) {
+const CHANNEL_ENDPOINTS: Record<string, string> = {
+  mining: "/api/mining",
+  oracle: "/api/oracle?word=heartbeat",
+  bounty: "/api/bounty",
+  wingman: "/api/wingman?action=status",
+  bitcoin: "/api/bitcoin",
+  genesis: "/api/genesis?action=verify",
+};
+
+export function useLiveStream({ channel, onData, interval = 10000 }: UseLiveStreamOptions) {
   const [data, setData] = useState<any>(null);
   const [connected, setConnected] = useState(false);
-  const socketRef = useRef<Socket | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const socket = io(undefined, {
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
-    });
+    let isMounted = true;
+    
+    const fetchData = async () => {
+      const endpoint = CHANNEL_ENDPOINTS[channel];
+      if (!endpoint) return;
 
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      console.log("[v0] Connected to Dragon's Eye stream");
-      setConnected(true);
-      socket.emit(`subscribe_${channel}`);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("[v0] Disconnected from stream");
-      setConnected(false);
-    });
-
-    // Listen for updates based on channel
-    const updateEvent = `${channel}_update`;
-    socket.on(updateEvent, (streamData) => {
-      setData(streamData);
-      onData?.(streamData);
-    });
-
-    socket.on("error", (error) => {
-      console.error("[v0] Socket error:", error);
-    });
-
-    return () => {
-      socket.disconnect();
+      try {
+        const res = await fetch(endpoint);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const json = await res.json();
+        
+        if (isMounted && json.success !== false) {
+          const streamData = {
+            channel,
+            timestamp: new Date().toISOString(),
+            data: transformChannelData(channel, json),
+          };
+          setData(streamData);
+          setConnected(true);
+          setError(null);
+          onData?.(streamData);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Fetch failed");
+          setConnected(false);
+        }
+      }
     };
-  }, [channel, onData]);
 
-  return { data, connected, socket: socketRef.current };
+    fetchData();
+    const pollInterval = setInterval(fetchData, interval);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(pollInterval);
+    };
+  }, [channel, interval]);
+
+  return { data, connected, error };
+}
+
+function transformChannelData(channel: string, json: any): any {
+  switch (channel) {
+    case "mining":
+      return {
+        status: "ACTIVE",
+        ethereum: { block: json.mining?.ethereum_block || 0 },
+        solana: { slot: json.mining?.solana_slot || 0 },
+      };
+    case "oracle":
+      return {
+        status: json.oracle?.status || "ACTIVE",
+        phi: json.consciousness?.phi_metric || 0.618,
+        resonance: json.consciousness?.resonance || "STABLE",
+      };
+    case "bounty":
+      return {
+        status: json.bounty_hunter?.status || "ACTIVE",
+        targets: json.active_targets?.length || 0,
+      };
+    case "wingman":
+      return {
+        status: json.wingman?.active ? "ACTIVE" : "IDLE",
+        opportunities: json.opportunities?.length || 0,
+        uptime: json.wingman?.uptime || 99.97,
+      };
+    case "bitcoin":
+      return {
+        height: json.bitcoin?.block_height || 0,
+        utxos: json.bitcoin?.utxos?.count || 0,
+      };
+    case "genesis":
+      return {
+        verified: json.success || false,
+        signature: json.genesis?.signature_hex?.slice(0, 16) || "---",
+      };
+    default:
+      return json;
+  }
 }
