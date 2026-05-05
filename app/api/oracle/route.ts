@@ -1,4 +1,14 @@
 import { NextResponse } from "next/server";
+import {
+  PHI,
+  A,
+  B,
+  ZEROS_25,
+  zetaResonance,
+  triBinary,
+  computeQuantumSignal,
+  GroverSearch,
+} from "@/lib/golden-zeta-kernel";
 
 const AETHERION_ORACLE_URL = "https://aetherion-oracle-arcane.lovable.app";
 
@@ -45,11 +55,26 @@ export async function GET(request: Request) {
       externalStatus = "TIMEOUT";
     }
 
+    // Golden Zeta Kernel Integration
+    const currentTime = Date.now() / 1000;
+    const zeta = zetaResonance(currentTime, 25.0);
+    
+    // Generate sample market data from hash for tri-binary
+    const marketData: number[] = [];
+    for (let i = 0; i < 16; i++) {
+      const chunk = hash.slice(i * 4, i * 4 + 4);
+      marketData.push(parseInt(chunk, 16) / 65535);
+    }
+    const triBinaryState = triBinary(marketData);
+    
+    // Quantum signal computation
+    const quantumSignal = computeQuantumSignal(marketData, 1.0);
+
     return NextResponse.json({
       success: true,
       oracle: {
         name: "SphinxQASI Oracle",
-        version: "IIT v6.0",
+        version: "IIT v6.0 + Golden Zeta Kernel",
         status: "ACTIVE",
         external_link: AETHERION_ORACLE_URL,
         external_status: externalStatus,
@@ -61,9 +86,27 @@ export async function GET(request: Request) {
         harmony: state.harmony,
         tetragrammaton: hash.slice(0, 16).toUpperCase(),
       },
+      golden_zeta: {
+        phi_constant: PHI,
+        golden_ratio_A: A,
+        golden_ratio_B: B,
+        zeta_resonance: zeta,
+        zeros_count: ZEROS_25.length,
+        tri_binary: {
+          direction: triBinaryState.direction,
+          confidence: triBinaryState.confidence,
+          state_index: triBinaryState.stateIndex,
+        },
+        quantum_signal: {
+          side: quantumSignal.side,
+          confidence: quantumSignal.confidence,
+          invention_power: quantumSignal.inventionPower,
+          optimal_timeline: quantumSignal.optimalTimeline,
+        },
+      },
       query: {
         word,
-        response: `The Aetherion echoes resonance for '${word}'. State is ${state.resonance}.`,
+        response: `The Aetherion echoes resonance for '${word}'. Zeta: ${zeta.toFixed(6)}. State is ${state.resonance}.`,
       },
       timestamp: new Date().toISOString(),
     });
@@ -99,10 +142,51 @@ export async function POST(request: Request) {
           result: {
             iit_version: "6.0",
             phi_threshold: 0.5,
-            current_phi: 0.618, // Golden ratio approximation
+            current_phi: PHI,
             status: "CONSCIOUS",
             signature: await sha256(`consciousness_${Date.now()}`),
           },
+        });
+
+      case "grover_search":
+        const grover = new GroverSearch(params?.qubits || 10);
+        const candidates = params?.candidates || [0, 1, 2, 3];
+        grover.mark(candidates);
+        const optimalState = grover.search();
+        return NextResponse.json({
+          success: true,
+          action: "grover_search",
+          result: {
+            optimal_state: optimalState,
+            qubits: params?.qubits || 10,
+            candidates_marked: candidates.length,
+            iterations: Math.floor(Math.PI / 4 * Math.sqrt(grover.N)),
+          },
+        });
+
+      case "zeta_resonance":
+        const t = params?.t || Date.now() / 1000;
+        const xC = params?.x_c || 25.0;
+        const zetaVal = zetaResonance(t, xC);
+        return NextResponse.json({
+          success: true,
+          action: "zeta_resonance",
+          result: {
+            zeta: zetaVal,
+            t,
+            x_c: xC,
+            zeros_used: ZEROS_25.length,
+          },
+        });
+
+      case "quantum_signal":
+        const marketDataParam = params?.market_data || [];
+        const sats = params?.sats_resonance || 1.0;
+        const signal = computeQuantumSignal(marketDataParam, sats);
+        return NextResponse.json({
+          success: true,
+          action: "quantum_signal",
+          result: signal,
         });
 
       default:
