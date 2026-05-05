@@ -72,6 +72,7 @@ export function PayoutManifest() {
           alt="Background"
           fill
           className="object-cover"
+          unoptimized
         />
       </div>
 
