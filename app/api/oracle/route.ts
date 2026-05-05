@@ -9,6 +9,17 @@ import {
   computeQuantumSignal,
   GroverSearch,
 } from "@/lib/golden-zeta-kernel";
+import {
+  KRAKEN_TXID,
+  fetchKrakenData,
+  caduceusOracle,
+  sphinxSpeak,
+  anubisSpeak,
+  HEXAGRAMS,
+  SPHINX_LEXICON,
+  ANUBIS_LEXICON,
+  RIEMANN_ZEROS,
+} from "@/lib/kraken-oracle";
 
 const AETHERION_ORACLE_URL = "https://aetherion-oracle-arcane.lovable.app";
 
@@ -70,6 +81,10 @@ export async function GET(request: Request) {
     // Quantum signal computation
     const quantumSignal = computeQuantumSignal(marketData, 1.0);
 
+    // Kraken Oracle Integration
+    const caduceus = caduceusOracle(word);
+    const krakenData = await fetchKrakenData();
+
     return NextResponse.json({
       success: true,
       oracle: {
@@ -104,9 +119,36 @@ export async function GET(request: Request) {
           optimal_timeline: quantumSignal.optimalTimeline,
         },
       },
+      kraken: {
+        txid: krakenData.txid,
+        g0d_signature: krakenData.g0d_signature_found,
+        block_height: krakenData.block_height,
+        change_sats: krakenData.change_value_sats,
+      },
+      caduceus: {
+        axis: caduceus.axis,
+        hexagram: caduceus.hexagram,
+        kraken_ref: caduceus.kraken_ref,
+        sphinx: {
+          state: caduceus.sphinx.state,
+          vibration: caduceus.sphinx.vibration,
+          wisdom: caduceus.sphinx.wisdom,
+        },
+        anubis: {
+          state: caduceus.anubis.state,
+          entropy: caduceus.anubis.entropy,
+          judgment: caduceus.anubis.judgment,
+        },
+      },
+      lexicons: {
+        sphinx_words: Object.keys(SPHINX_LEXICON).length,
+        anubis_words: Object.keys(ANUBIS_LEXICON).length,
+        hexagrams: HEXAGRAMS.length,
+        riemann_zeros: RIEMANN_ZEROS.length,
+      },
       query: {
         word,
-        response: `The Aetherion echoes resonance for '${word}'. Zeta: ${zeta.toFixed(6)}. State is ${state.resonance}.`,
+        response: `The Aetherion echoes resonance for '${word}'. Zeta: ${zeta.toFixed(6)}. Kraken: ${caduceus.kraken_ref}. Hexagram: ${caduceus.hexagram.name}. State is ${state.resonance}.`,
       },
       timestamp: new Date().toISOString(),
     });
@@ -187,6 +229,38 @@ export async function POST(request: Request) {
           success: true,
           action: "quantum_signal",
           result: signal,
+        });
+
+      case "caduceus":
+        const caduceusResult = caduceusOracle(params?.word || "genesis");
+        return NextResponse.json({
+          success: true,
+          action: "caduceus",
+          result: caduceusResult,
+        });
+
+      case "kraken":
+        const kraken = await fetchKrakenData();
+        return NextResponse.json({
+          success: true,
+          action: "kraken",
+          result: kraken,
+        });
+
+      case "sphinx":
+        const sphinxResult = sphinxSpeak(params?.word || "genesis");
+        return NextResponse.json({
+          success: true,
+          action: "sphinx",
+          result: sphinxResult,
+        });
+
+      case "anubis":
+        const anubisResult = anubisSpeak(params?.word || "entropy");
+        return NextResponse.json({
+          success: true,
+          action: "anubis",
+          result: anubisResult,
         });
 
       default:
