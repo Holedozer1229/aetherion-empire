@@ -20,12 +20,11 @@ interface UTXO {
 async function fetchSpendableUtxos(address: string): Promise<UTXO[]> {
   try {
     const res = await fetch(`${API_BASE}/address/${address}/utxo`, {
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", "User-Agent": "aetherion-empire/1.0" },
+      signal: AbortSignal.timeout(8000),
     });
     
-    if (!res.ok) {
-      throw new Error(`Mempool API error: ${res.status}`);
-    }
+    if (!res.ok) return [];
     
     const data: UTXO[] = await res.json();
     
@@ -39,19 +38,20 @@ async function fetchSpendableUtxos(address: string): Promise<UTXO[]> {
   }
 }
 
+const MEMPOOL_HEADERS = {
+  Accept: "application/json",
+  "User-Agent": "aetherion-empire/1.0",
+};
+
 async function fetchAddressInfo(address: string) {
   try {
     const res = await fetch(`${API_BASE}/address/${address}`, {
-      headers: { Accept: "application/json" },
+      headers: MEMPOOL_HEADERS,
+      signal: AbortSignal.timeout(8000),
     });
-    
-    if (!res.ok) {
-      throw new Error(`Mempool API error: ${res.status}`);
-    }
-    
+    if (!res.ok) return null;
     return await res.json();
-  } catch (err) {
-    console.error("[v0] Failed to fetch address info:", err);
+  } catch {
     return null;
   }
 }
@@ -59,16 +59,12 @@ async function fetchAddressInfo(address: string) {
 async function fetchCurrentFeeRates() {
   try {
     const res = await fetch(`${API_BASE}/v1/fees/recommended`, {
-      headers: { Accept: "application/json" },
+      headers: MEMPOOL_HEADERS,
+      signal: AbortSignal.timeout(8000),
     });
-    
-    if (!res.ok) {
-      throw new Error(`Mempool API error: ${res.status}`);
-    }
-    
+    if (!res.ok) return { fastestFee: 10, halfHourFee: 8, hourFee: 5, minimumFee: 1 };
     return await res.json();
-  } catch (err) {
-    console.error("[v0] Failed to fetch fee rates:", err);
+  } catch {
     return { fastestFee: 10, halfHourFee: 8, hourFee: 5, minimumFee: 1 };
   }
 }
@@ -76,17 +72,53 @@ async function fetchCurrentFeeRates() {
 async function fetchBlockHeight() {
   try {
     const res = await fetch(`${API_BASE}/blocks/tip/height`, {
-      headers: { Accept: "application/json" },
+      headers: MEMPOOL_HEADERS,
+      signal: AbortSignal.timeout(8000),
     });
-    
-    if (!res.ok) {
-      throw new Error(`Mempool API error: ${res.status}`);
-    }
-    
+    if (!res.ok) return null;
     const height = await res.text();
     return parseInt(height, 10);
-  } catch (err) {
-    console.error("[v0] Failed to fetch block height:", err);
+  } catch {
+    return null;
+  }
+}
+
+async function fetchBtcPriceUsd(): Promise<number | null> {
+  try {
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+      { headers: { Accept: "application/json" }, next: { revalidate: 60 } }
+    );
+    if (!res.ok) throw new Error("coingecko failed");
+    const json = await res.json();
+    return json?.bitcoin?.usd ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchMempoolCount(): Promise<number | null> {
+  try {
+    const res = await fetch(`${API_BASE}/mempool`, {
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error("mempool count failed");
+    const json = await res.json();
+    return json?.count ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchNetworkDifficulty(): Promise<number | null> {
+  try {
+    const res = await fetch(`${API_BASE}/v1/difficulty-adjustment`, {
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error("difficulty failed");
+    const json = await res.json();
+    return json?.currentDifficulty ?? null;
+  } catch {
     return null;
   }
 }
@@ -134,30 +166,41 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // Default: return all Bitcoin mainnet data
-  const [utxos, addressInfo, fees, blockHeight] = await Promise.all([
-    fetchSpendableUtxos(address),
-    fetchAddressInfo(address),
-    fetchCurrentFeeRates(),
-    fetchBlockHeight(),
-  ]);
+  // Default: return all Bitcoin mainnet data (flat shape for components)
+  const [utxos, addressInfo, fees, blockHeight, btcPriceUsd, mempoolCount, networkDifficulty] =
+    await Promise.all([
+      fetchSpendableUtxos(address),
+      fetchAddressInfo(address),
+      fetchCurrentFeeRates(),
+      fetchBlockHeight(),
+      fetchBtcPriceUsd(),
+      fetchMempoolCount(),
+      fetchNetworkDifficulty(),
+    ]);
 
   const totalValue = utxos.reduce((acc, u) => acc + u.value, 0);
 
   return NextResponse.json({
     success: true,
-    bitcoin: {
-      address,
-      utxos: {
-        count: utxos.length,
-        total_sats: totalValue,
-        total_btc: (totalValue / 100000000).toFixed(8),
-        spendable: utxos,
-      },
-      address_info: addressInfo,
-      fees,
-      block_height: blockHeight,
+    // Flat fields consumed by components directly
+    block_height: blockHeight,
+    btc_price_usd: btcPriceUsd,
+    mempool_count: mempoolCount,
+    network_difficulty: networkDifficulty,
+    fee_rates: {
+      fast: fees.fastestFee,
+      medium: fees.halfHourFee,
+      slow: fees.hourFee,
     },
+    // Nested detail
+    address,
+    utxos: {
+      count: utxos.length,
+      total_sats: totalValue,
+      total_btc: (totalValue / 100000000).toFixed(8),
+      spendable: utxos,
+    },
+    address_info: addressInfo,
     payout_address_eth: PAYOUT_ADDRESS,
     network: "MAINNET",
     api: "mempool.space",
