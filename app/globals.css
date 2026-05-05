@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Lucky Palace - Luxurious Gold & Black Theme */
+  --background: 20 10% 4%;
+  --foreground: 43 100% 85%;
+  
+  --card: 20 10% 8%;
+  --card-foreground: 43 100% 85%;
+  
+  --primary: 43 74% 49%;
+  --primary-foreground: 20 10% 4%;
+  
+  --secondary: 174 72% 40%;
+  --secondary-foreground: 20 10% 4%;
+  
+  --muted: 20 10% 15%;
+  --muted-foreground: 43 30% 60%;
+  
+  --accent: 43 74% 49%;
+  --accent-foreground: 20 10% 4%;
+  
+  --border: 43 50% 25%;
+  --ring: 43 74% 49%;
+  
+  --radius: 0.75rem;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Golden glow effects */
+.gold-glow {
+  box-shadow: 
+    0 0 20px rgba(212, 175, 55, 0.2),
+    0 0 40px rgba(212, 175, 55, 0.1),
+    inset 0 1px 0 rgba(212, 175, 55, 0.2);
+}
+
+.gold-border {
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 175, 55, 0.05) 0%,
+    rgba(20, 18, 15, 0.95) 100%
+  );
+}
+
+.glass-panel {
+  background: rgba(20, 18, 15, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+/* Animated gradient border */
+.gradient-border {
+  position: relative;
+  background: hsl(var(--card));
+  border-radius: var(--radius);
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--radius) + 1px);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 175, 55, 0.6) 0%,
+    rgba(212, 175, 55, 0.1) 50%,
+    rgba(0, 168, 150, 0.4) 100%
+  );
+  z-index: -1;
+}
+
+/* Cyber grid pattern */
+.cyber-grid {
+  background-image: 
+    linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Text gradient */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Kraken tentacle decorative elements */
+.kraken-corner {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+
+/* Status badges */
+.status-verified {
+  color: #00c896;
+  text-shadow: 0 0 10px rgba(0, 200, 150, 0.5);
+}
+
+.status-pending {
+  color: #d4af37;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* Chart styling overrides */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(212, 175, 55, 0.1);
+}
+
+.recharts-text {
+  fill: hsl(var(--muted-foreground));
+}
