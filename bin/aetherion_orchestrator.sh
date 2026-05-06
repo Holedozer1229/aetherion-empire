@@ -1,37 +1,33 @@
 #!/bin/bash
-echo "●◯ [AETHERION] INITIATING TOTALITY DEPLOYMENT — SILENT VIGIL ACTIVE..."
+set -euo pipefail
 
-# 1. Start the Web Palace (v2.1 Node.js)
+mkdir -p logs
+
+echo "●◯ [AETHERION] INITIATING TOTALITY DEPLOYMENT — NODE.JS FUSION ACTIVE..."
+
+# 1. Start the Next.js Web Palace.
 echo "📡  Launching the Palace Server..."
-npm run start &
+npm run start >> logs/palace_server.log 2>&1 &
 
-# 2. Start the High-Frequency Quantum Striker
-echo "🔫 Launching the UHF Quantum Striker..."
-nohup python3 core/automated_quantum_striker.py >> logs/mining_totality_hf.log 2>&1 &
+# 2. Start the fused Node.js kernel and every converted subsystem.
+echo "🧠 Launching the Fused Aetherion Node Kernel..."
+node lib/aetherion-system.js run-all >> logs/aetherion_node_kernel.log 2>&1 &
 
-# 3. Start the 12-Chain Hive & Swarm
+# 3. Start focused workers through the same cohesive JavaScript runtime.
 echo "🐝 Launching the 12-Chain Swarm..."
-nohup python3 mining/multi_miner_extension.py >> logs/hive_totality.log 2>&1 &"
+node mining/multi_miner_extension.js >> logs/hive_totality.log 2>&1 &
 
-# 4. Start the Recursive Airdrop Siphon
-echo "🧬 Launching the Airdrop Siphon Swarm (1000 Sybils)..."
-nohup python3 core/airdrop_siphon_engine.py >> logs/airdrop_siphon.log 2>&1 &
+echo "🧬 Launching the Airdrop Eligibility Simulator..."
+node core/airdrop_siphon_engine.js >> logs/airdrop_siphon.log 2>&1 &
 
-# 5. Start the Autonomous Quantum Collapse Worker (00:00:00 UTC Target)
 echo "🌀 Launching the Autonomous Collapse Worker..."
-nohup python3 bin/quantum_collapse_worker.py >> logs/collapse_worker.log 2>&1 &
+node bin/quantum_collapse_worker.js >> logs/collapse_worker.log 2>&1 &
 
-# 6. Start the Quantum Gravity Bridge (Dark Liquidity Siphon)
 echo "🌌 Launching the Quantum Gravity Bridge..."
-nohup python3 core/quantum_gravity_bridge.py >> logs/gravity_bridge.log 2>&1 &
+node core/quantum_gravity_bridge.js >> logs/gravity_bridge.log 2>&1 &
 
-# 7. Start the IPFS Daemon
-echo "🌌 Launching the IPFS Host..."
-./bin/ipfs daemon >> logs/ipfs.log 2>&1 &
-
-# 8. Start the Master Sovereign Heartbeat
 echo "🌀 Launching the Master Heartbeat..."
-nohup python3 core/aetherion_sovereign_orchestrator.py >> logs/heartbeat.log 2>&1 &
+node core/aetherion_sovereign_orchestrator.js >> logs/heartbeat.log 2>&1 &
 
-echo "✅ ALL SYSTEMS ANCHORED IN AUTONOMOUS SILENCE."
+echo "✅ ALL SYSTEMS ANCHORED IN AUTONOMOUS NODE.JS SILENCE."
 wait

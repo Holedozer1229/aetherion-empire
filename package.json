@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "empire": "node lib/aetherion-system.js",
+    "empire:server": "node lib/aetherion-system.js server",
+    "empire:run-all": "node lib/aetherion-system.js run-all",
+    "empire:list": "node lib/aetherion-system.js list"
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.10",
