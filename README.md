@@ -58,3 +58,33 @@ The system is now built on a unified **Node.js/TypeScript/JavaScript** stack des
 
 ---
 **© 2026 Aetherion Empire. All Realities Reserved.**
+
+---
+
+## Lucky Palace Satoshi Dice
+
+### Structure
+- `frontend/`: Vite + React + Tailwind + Framer Motion interface.
+- `backend/`: Flask API implementing session init, betting, payment verification, oracle roll, and withdrawals.
+- `docker-compose.yml`: One-command local stack.
+
+### Quick Start
+```bash
+# from repository root
+docker compose up
+```
+
+Frontend: `http://localhost:5173`  
+Backend: `http://localhost:5000`
+
+### Backend Endpoints
+- `POST /api/game/init`
+- `POST /api/game/place_bet`
+- `GET /api/game/verify_payment/<session_id>`
+- `POST /api/game/roll`
+- `POST /api/game/withdraw`
+
+### Notes
+- Provably fair commitment = `sha256(seed)` from `/api/game/init`.
+- Current Alby behavior in this scaffold falls back to mock invoices if `ALBY_TOKEN` is not set.
+- House edge is configurable via `HOUSE_EDGE` (default `0.05`).

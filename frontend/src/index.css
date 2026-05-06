@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  color: #f8e7a2;
+}
