@@ -109,7 +109,9 @@ export default function GamePage() {
             )}
           </div>
           <BetControls betSats={betSats} onBetSats={setBetSats} onRoll={onRoll} />
-          <TribinaryWheel selected={tribinary} onSelect={setTribinary} />
+          {predictionType === 'tribinary' && (
+            <TribinaryWheel selected={tribinary} onSelect={setTribinary} />
+          )}
         </div>
         <div className="space-y-4">
           <div className="flex justify-center">
