@@ -16,6 +16,7 @@ import { AuditReport } from "@/components/audit-report";
 import { PayoutManifest } from "@/components/payout-manifest";
 import { FeaturesSection } from "@/components/features-section";
 import { ParticleField } from "@/components/particle-field";
+import { AsiChatMonetization } from "@/components/asi-chat-monetization";
 import { Footer } from "@/components/footer";
 
 export default function LuckyPalacePage() {
@@ -28,6 +29,7 @@ export default function LuckyPalacePage() {
         <LiveStats />
         <DeFiDashboard />
         <AetherionOracle />
+        <AsiChatMonetization />
         <BugBountyHunter />
         <WingmanAgent />
         <BitcoinDashboard />
