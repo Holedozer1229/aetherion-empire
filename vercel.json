@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "name": "aetherion-empire-totality",
+  "builds": [
+    { "src": "web/index.html", "use": "@vercel/static" },
+    { "src": "aetherion/palace_server.ts", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/rpc", "dest": "aetherion/palace_server.ts" },
+    { "src": "/api/(.*)", "dest": "aetherion/palace_server.ts" },
+    { "src": "/(.*)", "dest": "web/index.html" }
+  ]
+}

@@ -1,36 +1,24 @@
 services:
   - type: web
-    name: aetherion-palace
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT web.merged_oracle_palace:app
+    name: aetherion-empire-totality
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: ./bin/aetherion_orchestrator.sh
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
+      - key: NODE_VERSION
+        value: 20.20.2
+      - key: ALCHEMY_KEY
+        value: rtqwXY0KIturHgl9GLCqy
+      - key: SUPABASE_URL
+        value: https://vlfobjlixbkahsayokus.supabase.co
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsZm9iamxpeGJrYWhzYXlva3VzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTUzMjU0NywiZXhwIjoyMDkxMTA4NTQ3fQ.81JJBOSVbQAtelMXNTXbvh0ayje8ReBXuMN9PhE3570
 
   - type: worker
-    name: aetherion-p2p-node
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python3 core/p2p_network_core.py
+    name: x-social-oracle
+    env: node
+    buildCommand: npm install playwright && npx playwright install-deps && npx playwright install chromium
+    startCommand: node core/x_social_oracle.js
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
-
-  - type: worker
-    name: aetherion-miner
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python3 core/mining_orchestrator.py
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
-
-  - type: worker
-    name: aetherion-vulture
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python3 core/aetherion_vulture.py
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
+      - key: NODE_VERSION
+        value: 20.20.2
