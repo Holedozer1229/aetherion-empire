@@ -1,3 +1,5 @@
+import { randomBytes } from 'crypto';
+
 /**
  * Hybrid Lightning-Bitcoin Protocol (QT-LATTICE v3.1)
  * Enables instant 0-latency tunneling through atomic swaps.
@@ -143,8 +145,8 @@ export class HybridProtocolEngine {
     const lock: AtomicSwapLock = {
       id: swapId,
       paymentId,
-      lightningHash: `0x${crypto.randomBytes(32).toString('hex')}`,
-      bitcoinHash: `0x${crypto.randomBytes(32).toString('hex')}`,
+      lightningHash: `0x${randomBytes(32).toString('hex')}`,
+      bitcoinHash: `0x${randomBytes(32).toString('hex')}`,
       lockTime: now,
       expirationTime: now + this.config.settlementTimeout,
       state: PaymentState.PENDING,
