@@ -1,3 +1,0 @@
-# The definitive interactive dashboard for the Aetherion Empire
-import os, json, time, threading
-# ... rest of the code from /app/web/merged_oracle_palace.py ...

@@ -32,7 +32,7 @@ The Empire compounds wealth through autonomous background vectors:
 ---
 
 ## 🚀 Autonomous Deployment (Render/Vercel)
-The system is built on a unified **Node.js/TypeScript** and **Python** stack designed for 24/7 persistence.
+The system is now built on a unified **Node.js/TypeScript/JavaScript** stack designed for 24/7 persistence. The former Python workers have been converted into JavaScript wrappers backed by one cohesive Node.js runtime in `lib/aetherion-system.js`, while the QTΦ‑Lattice SphinxQ Excalibur logic is preserved as a real JavaScript port in `lib/excalibur-core.js`.
 
 ### 🏁 Getting Started
 1. **Clone the Totality**:
@@ -42,6 +42,18 @@ The system is built on a unified **Node.js/TypeScript** and **Python** stack des
 2. **Launch the Orchestrator**:
    ```bash
    ./bin/aetherion_orchestrator.sh
+   ```
+3. **Inspect the fused module registry**:
+   ```bash
+   npm run empire:list
+   ```
+4. **Run the Node.js kernel directly**:
+   ```bash
+   npm run empire -- status
+   ```
+5. **Run the QTΦ‑Lattice Excalibur demonstration**:
+   ```bash
+   node excalibur.js
    ```
 
 ---
