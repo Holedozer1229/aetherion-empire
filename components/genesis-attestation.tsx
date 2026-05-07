@@ -6,6 +6,7 @@ import { Lock, Zap, Code2, CheckCircle } from "lucide-react";
 
 export function GenesisAttestation() {
   const [attestation, setAttestation] = useState<any>(null);
+  const [bipSpec, setBipSpec] = useState<any>(null);
   const [camelot, setCamelot] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -19,6 +20,7 @@ export function GenesisAttestation() {
         const attData = await attRes.json();
         const camelotData = await camelotRes.json();
         setAttestation(attData.attestation);
+        setBipSpec(attData.bip_322_spec);
         setCamelot(camelotData.camelot);
       } catch (err) {
         console.error("[v0] Genesis fetch failed:", err);
@@ -69,8 +71,13 @@ export function GenesisAttestation() {
             <Lock className="w-8 h-8 text-neon-pink animate-pulse" />
           </div>
           <p className="text-neon-purple text-lg font-mono">
-            BIP-420 | BIP-322 | SOVEREIGN SCALAR
+            {bipSpec ? `BIP-${bipSpec.bip}: ${bipSpec.title}` : "BIP-322 | SOVEREIGN SCALAR"}
           </p>
+          {bipSpec && (
+            <p className="text-neon-cyan/70 text-sm font-mono mt-1">
+              Author: {bipSpec.author} | Status: {bipSpec.status} | {bipSpec.license}
+            </p>
+          )}
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -90,23 +97,37 @@ export function GenesisAttestation() {
 
             <div className="space-y-3 font-mono text-sm">
               <div>
-                <p className="text-neon-purple text-xs uppercase">Message Hash</p>
+                <p className="text-neon-purple text-xs uppercase">Message Hash (SHA-256)</p>
                 <p className="text-neon-pink break-all text-xs">
-                  {attestation?.bip322_signature}
+                  {attestation?.message_hash_sha256}
                 </p>
               </div>
 
               <div>
-                <p className="text-neon-purple text-xs uppercase">Genesis Public Key</p>
+                <p className="text-neon-purple text-xs uppercase">ECDSA Signature (r)</p>
                 <p className="text-neon-cyan break-all text-xs">
-                  {attestation?.genesis_pubkey?.slice(0, 40)}...
+                  {attestation?.ecdsa_signature?.r}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-neon-purple text-xs uppercase">ECDSA Signature (s)</p>
+                <p className="text-neon-cyan break-all text-xs">
+                  {attestation?.ecdsa_signature?.s}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-neon-purple text-xs uppercase">Recovery ID (v)</p>
+                <p className="text-neon-cyan text-xs">
+                  {attestation?.ecdsa_signature?.v} ({attestation?.ecdsa_signature?.recovery_id_decimal} decimal)
                 </p>
               </div>
 
               <div className="flex items-center gap-2 mt-4">
                 <CheckCircle className="w-4 h-4 text-neon-cyan" />
                 <span className="text-neon-cyan font-bold">
-                  {attestation?.genesis_verified ? "VERIFIED" : "INVALID"}
+                  {attestation?.genesis_verified ? "SIGNATURE VERIFIED" : "INVALID"}
                 </span>
               </div>
             </div>

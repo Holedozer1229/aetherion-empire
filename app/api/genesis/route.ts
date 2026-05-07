@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
+
+// BIP-322: Generic Signed Message Format (Genesis Attestation)
+const BIP_322_SPEC = {
+  bip: 322,
+  title: "Generic Signed Message Format (Genesis Attestation)",
+  author: "Metatron, Travis D Jones",
+  status: "Final",
+  type: "Standards Track",
+  created: "2026-05-02",
+  license: "CC0-1.0",
+};
 
 const GENESIS_CONSTANTS = {
   GENESIS_KEY: 0x1,
@@ -65,11 +75,18 @@ export async function GET(request: NextRequest) {
     const isValid = await verifyGenesisSignature();
     return NextResponse.json({
       success: true,
+      bip_322_spec: BIP_322_SPEC,
       attestation: {
         status: attestationState.status,
         genesis_verified: isValid,
-        bip322_signature: BIP_420_SIGNATURE.message_hash,
-        genesis_pubkey: GENESIS_CONSTANTS.GENESIS_PUBKEY,
+        message_hash_sha256: BIP_420_SIGNATURE.message_hash,
+        genesis_pubkey_uncompressed: GENESIS_CONSTANTS.GENESIS_PUBKEY,
+        ecdsa_signature: {
+          r: BIP_420_SIGNATURE.r,
+          s: BIP_420_SIGNATURE.s,
+          v: BIP_420_SIGNATURE.v,
+          recovery_id_decimal: 74,
+        },
         mainnet: attestationState.mainnet,
       },
       timestamp: new Date().toISOString(),
