@@ -1,9 +1,13 @@
 "use client";
 
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { Button } from "@/components/ui/button";
 
 export function WalletHeader() {
+  const { address, isConnected, chain } = useAccount();
+  const { connectors, connect } = useConnect();
+  const { disconnect } = useDisconnect();
+
   return (
     <header className="w-full border-b border-cyan-500/20 bg-black/95 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -13,82 +17,41 @@ export function WalletHeader() {
           </div>
           <div className="text-xs text-cyan-400/60 font-mono">v2.0 | Ξ SOVEREIGNTY</div>
         </div>
-        <ConnectButton.Custom>
-          {({
-            account,
-            chain,
-            openAccountModal,
-            openChainModal,
-            openConnectModal,
-            authenticationStatus,
-            mounted,
-          }) => {
-            const ready = mounted && authenticationStatus !== "loading";
-            const connected =
-              ready &&
-              account &&
-              chain &&
-              authenticationStatus !== "unauthenticated";
-
-            if (!connected) {
-              return (
+        
+        <div className="flex items-center gap-2">
+          {!isConnected ? (
+            <div className="flex gap-2">
+              {connectors.map((connector) => (
                 <Button
+                  key={connector.id}
+                  onClick={() => connect({ connector })}
                   className="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-black font-bold border border-cyan-400/50 shadow-lg shadow-cyan-500/50"
                   size="sm"
-                  onClick={openConnectModal}
                 >
-                  INITIATE CONNECTION
+                  Connect {connector.name}
                 </Button>
-              );
-            }
-
-            if (chain.unsupported) {
-              return (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={openChainModal}
-                  className="animate-pulse"
-                >
-                  ⚠ INVALID NETWORK
-                </Button>
-              );
-            }
-
-            return (
-              <div className="flex items-center gap-2">
-                <Button
-                  className="bg-cyan-950/50 border border-cyan-500/30 hover:bg-cyan-900/50 text-cyan-300"
-                  size="sm"
-                  onClick={openChainModal}
-                >
-                  {chain.iconUrl && (
-                    <img
-                      alt={chain.name ?? "Chain icon"}
-                      src={chain.iconUrl}
-                      className="mr-2 h-4 w-4 rounded-full"
-                    />
-                  )}
-                  <span className="font-mono text-xs">{chain.name}</span>
-                </Button>
-                <Button
-                  className="bg-gradient-to-r from-emerald-950 to-cyan-950 border border-emerald-500/30 hover:border-emerald-400/50 text-emerald-300"
-                  size="sm"
-                  onClick={openAccountModal}
-                >
-                  <span className="mr-2 font-mono text-xs">
-                    {account.displayName}
-                  </span>
-                  {account.displayBalance && (
-                    <span className="text-xs text-cyan-300">
-                      {account.displayBalance}
-                    </span>
-                  )}
-                </Button>
+              ))}
+            </div>
+          ) : (
+            <>
+              {chain && (
+                <div className="px-3 py-1 bg-cyan-950/50 border border-cyan-500/30 rounded text-cyan-300 text-xs font-mono">
+                  {chain.name}
+                </div>
+              )}
+              <div className="px-3 py-1 bg-emerald-950/50 border border-emerald-500/30 rounded text-emerald-300 text-xs font-mono">
+                {address?.slice(0, 6)}...{address?.slice(-4)}
               </div>
-            );
-          }}
-        </ConnectButton.Custom>
+              <Button
+                onClick={() => disconnect()}
+                variant="destructive"
+                size="sm"
+              >
+                Disconnect
+              </Button>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
